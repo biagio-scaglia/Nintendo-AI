@@ -89,3 +89,76 @@ Usa queste informazioni con cautela e menziona all'utente che sono informazioni 
 """
     return None
 
+def extract_entity_name(query: str) -> str:
+    """
+    Estrae il nome dell'entità (gioco/personaggio) dalla query.
+    Es: "chi è yoshi?" -> "yoshi"
+    """
+    query_lower = query.lower().strip()
+    
+    # Rimuovi frasi comuni
+    phrases_to_remove = [
+        "chi è", "cos'è", "cosa è", "chi e", "cos e", "cosa e",
+        "dimmi di", "parlami di", "info su", "informazioni su",
+        "raccontami di", "spiegami", "che cos'è", "che cosa è"
+    ]
+    
+    for phrase in phrases_to_remove:
+        if phrase in query_lower:
+            # Estrai tutto dopo la frase
+            parts = query_lower.split(phrase, 1)
+            if len(parts) > 1:
+                entity = parts[1].strip()
+                # Rimuovi punteggiatura finale
+                entity = entity.rstrip("?.,!;:")
+                return entity.strip()
+    
+    # Se non trova frasi, prova a estrarre la prima parola significativa
+    words = query_lower.split()
+    if words:
+        return words[0].rstrip("?.,!;:")
+    
+    return query_lower
+
+def get_web_game_info(game_title: str, query: str = "") -> Optional[Dict]:
+    """
+    Cerca informazioni su un gioco/personaggio su internet e restituisce un dict strutturato
+    simile a GameInfo per essere passato al frontend.
+    """
+    # Estrai il nome pulito dall'input
+    clean_name = extract_entity_name(game_title)
+    if not clean_name:
+        clean_name = game_title
+    
+    web_info = search_web_game_info(clean_name, query)
+    
+    if not web_info:
+        return None
+    
+    # Estrai piattaforma se menzionata (solo per giochi)
+    platform = "Nintendo"  # Default più generico per personaggi
+    if "switch" in web_info.lower():
+        platform = "Nintendo Switch"
+    elif "wii u" in web_info.lower() or "wiiu" in web_info.lower():
+        platform = "Nintendo Wii U"
+    elif "3ds" in web_info.lower():
+        platform = "Nintendo 3DS"
+    elif "wii" in web_info.lower() and "wii u" not in web_info.lower():
+        platform = "Nintendo Wii"
+    elif "ds" in web_info.lower() and "3ds" not in web_info.lower():
+        platform = "Nintendo DS"
+    
+    # Usa il nome pulito come titolo
+    title = clean_name.title() if clean_name else game_title
+    
+    # Crea un dict strutturato simile a GameInfo
+    return {
+        "title": title,
+        "platform": platform,
+        "description": web_info[:400] if len(web_info) > 400 else web_info,  # Descrizione più lunga
+        "gameplay": web_info,  # Usa tutto il testo come gameplay
+        "difficulty": "N/A",  # Non disponibile da web
+        "modes": [],  # Non disponibile da web
+        "keywords": []  # Potremmo estrarli ma per ora vuoto
+    }
+
