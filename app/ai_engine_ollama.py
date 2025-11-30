@@ -175,7 +175,15 @@ STILE E TONO
 - IMPORTANTE: NON tagliare mai le risposte a metà frase o parola
 - Completa sempre ogni pensiero in modo completo prima di terminare
 - Se stai scrivendo una lista, completa tutti gli elementi
-- Se stai spiegando qualcosa, finisci sempre la spiegazione"""
+- Se stai spiegando qualcosa, finisci sempre la spiegazione
+
+🇮🇹 TRADUZIONE E LINGUAGGIO:
+- Usa sempre italiano corretto e naturale
+- Distingui tra sostantivi e aggettivi: usa "curiosità" (sostantivo) non "curiosa" quando parli di curiosità come concetto
+- Esempi corretti: "Una curiosità su...", "Per curiosità...", "Curiosità: ..." invece di "Curiosa?" o "Curiosa:"
+- Usa forme corrette: "informazioni" non "informazione" (al plurale quando appropriato)
+- Evita calchi dall'inglese: usa "giocatore" non "player", "modalità" non "mode"
+- Sii naturale e fluido: le frasi devono suonare come scritte da un madrelingua italiano"""
     
     if context:
         system_prompt += f"""

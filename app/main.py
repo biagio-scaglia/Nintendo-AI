@@ -143,6 +143,9 @@ async def chat_endpoint(payload: ChatRequest):
                     web_context = get_web_context(last_user_message, last_user_message, deep_scrape=deep_scrape)
                     if web_context:
                         context = web_context
+                        # Aggiungi istruzione per generare informazioni diverse
+                        if deep_scrape:
+                            context += "\n\n⚠️ ISTRUZIONE IMPORTANTE PER APPROFONDIMENTO:\n- L'utente ha già ricevuto informazioni su questo argomento\n- DEVI fornire informazioni DIVERSE e COMPLEMENTARI rispetto a quelle già date\n- Evita di ripetere le stesse informazioni già fornite\n- Concentrati su aspetti nuovi, dettagli aggiuntivi, curiosità, o prospettive diverse\n- Sii specifico e dettagliato con nuove informazioni"
                         # Crea GameInfo SOLO se c'è un'immagine da mostrare
                         try:
                             image_url = get_web_image_url(last_user_message, last_user_message, deep_scrape=deep_scrape)
@@ -196,6 +199,9 @@ async def chat_endpoint(payload: ChatRequest):
                 if web_context:
                     # Fandom ha trovato informazioni - usale come fonte principale
                     context = web_context
+                    # Aggiungi istruzione per generare informazioni diverse
+                    if deep_scrape:
+                        context += "\n\n⚠️ ISTRUZIONE IMPORTANTE PER APPROFONDIMENTO:\n- L'utente ha già ricevuto informazioni su questo argomento\n- DEVI fornire informazioni DIVERSE e COMPLEMENTARI rispetto a quelle già date\n- Evita di ripetere le stesse informazioni già fornite\n- Concentrati su aspetti nuovi, dettagli aggiuntivi, curiosità, o prospettive diverse\n- Sii specifico e dettagliato con nuove informazioni"
                     logger.info(f"✅ Using Fandom as primary source for game info")
                 else:
                     # Fallback: cerca nel database locale

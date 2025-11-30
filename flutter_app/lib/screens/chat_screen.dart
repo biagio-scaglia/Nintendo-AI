@@ -480,7 +480,62 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               const SizedBox(height: 12),
               _buildRecommendedGameCard(message.recommendedGame!),
             ],
+            // Bottone Approfondisci per messaggi dell'assistente
+            if (!isUser) ...[
+              const SizedBox(height: 8),
+              _buildDeepenButton(context, index),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeepenButton(BuildContext context, int messageIndex) {
+    final chatProvider = context.read<ChatProvider>();
+    
+    return Padding(
+      padding: const EdgeInsets.only(left: 48),
+      child: SizedBox(
+        height: 36,
+        child: OutlinedButton.icon(
+          onPressed: chatProvider.isLoading
+              ? null
+              : () {
+                  chatProvider.deepenMessage(messageIndex);
+                },
+          icon: Icon(
+            Icons.auto_awesome_rounded,
+            size: 16,
+            color: chatProvider.isLoading
+                ? Colors.grey.shade400
+                : Colors.red.shade700,
+          ),
+          label: Text(
+            'Approfondisci',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: chatProvider.isLoading
+                  ? Colors.grey.shade400
+                  : Colors.red.shade700,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(
+              color: chatProvider.isLoading
+                  ? Colors.grey.shade300
+                  : Colors.red.shade300,
+              width: 1.5,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            backgroundColor: chatProvider.isLoading
+                ? Colors.grey.shade50
+                : Colors.red.shade50.withOpacity(0.3),
+          ),
         ),
       ),
     );
