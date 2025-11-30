@@ -1,0 +1,758 @@
+[
+  {
+    "title": "The Legend of Zelda: Breath of the Wild",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "open-world",
+      "exploration",
+      "adventure",
+      "puzzle",
+      "action"
+    ],
+    "mood": [
+      "relax/rilassante",
+      "freedom/libertà",
+      "immersion/immersivo",
+      "epic/epico",
+      "wonder/meraviglia"
+    ]
+  },
+  {
+    "title": "Animal Crossing: New Horizons",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "simulation",
+      "relaxing",
+      "creative",
+      "social",
+      "casual"
+    ],
+    "mood": [
+      "calm/tranquillo",
+      "peaceful/pacifico",
+      "cozy/accogliente",
+      "comfort/confortevole",
+      "gentle/dolce"
+    ]
+  },
+  {
+    "title": "Splatoon 3",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "shooter",
+      "competitive",
+      "colorful",
+      "multiplayer",
+      "action"
+    ],
+    "mood": [
+      "energetic/energico",
+      "intense/intenso",
+      "exciting/emozionante",
+      "vibrant/vivace",
+      "competitive/competitivo"
+    ]
+  },
+  {
+    "title": "Mario Kart 8 Deluxe",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "racing",
+      "fun",
+      "multiplayer",
+      "party",
+      "competitive"
+    ],
+    "mood": [
+      "exciting/emozionante",
+      "festive/festoso",
+      "energetic/energico",
+      "social/sociale",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "Super Smash Bros. Ultimate",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "fighting",
+      "competitive",
+      "multiplayer",
+      "action",
+      "crossover"
+    ],
+    "mood": [
+      "intense/intenso",
+      "competitive/competitivo",
+      "exciting/emozionante",
+      "energetic/energico",
+      "epic/epico"
+    ]
+  },
+  {
+    "title": "Pokémon Scarlet & Violet",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "rpg",
+      "adventure",
+      "collection",
+      "open-world",
+      "pokemon"
+    ],
+    "mood": [
+      "adventurous/avventuroso",
+      "nostalgic/nostalgico",
+      "curious/curioso",
+      "comfort/confortevole",
+      "exploration/esplorazione"
+    ]
+  },
+  {
+    "title": "Metroid Dread",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "action",
+      "exploration",
+      "sci-fi",
+      "challenging",
+      "atmospheric"
+    ],
+    "mood": [
+      "tense/teso",
+      "intense/intenso",
+      "mysterious/misterioso",
+      "focused/concentrato",
+      "adventurous/avventuroso"
+    ]
+  },
+  {
+    "title": "Fire Emblem: Three Houses",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "strategy",
+      "rpg",
+      "story",
+      "tactical",
+      "deep"
+    ],
+    "mood": [
+      "thoughtful/riflessivo",
+      "strategic/strategico",
+      "immersive/immersivo",
+      "epic/epico",
+      "emotional/emotivo"
+    ]
+  },
+  {
+    "title": "Luigi's Mansion 3",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "adventure",
+      "puzzle",
+      "fun",
+      "spooky",
+      "creative"
+    ],
+    "mood": [
+      "playful/giocoso",
+      "curious/curioso",
+      "charming/affascinante",
+      "whimsical/capriccioso",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "Xenoblade Chronicles 3",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "rpg",
+      "epic",
+      "story",
+      "adventure",
+      "open-world"
+    ],
+    "mood": [
+      "epic/epico",
+      "emotional/emotivo",
+      "immersive/immersivo",
+      "adventurous/avventuroso",
+      "thoughtful/riflessivo"
+    ]
+  },
+  {
+    "title": "Mario Party Superstars",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "party",
+      "fun",
+      "multiplayer",
+      "casual",
+      "social"
+    ],
+    "mood": [
+      "festive/festoso",
+      "social/sociale",
+      "fun/divertente",
+      "energetic/energico",
+      "playful/giocoso"
+    ]
+  },
+  {
+    "title": "Pikmin 4",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "strategy",
+      "puzzle",
+      "cute",
+      "exploration",
+      "creative"
+    ],
+    "mood": [
+      "charming/affascinante",
+      "thoughtful/riflessivo",
+      "curious/curioso",
+      "gentle/dolce",
+      "creative/creativo"
+    ]
+  },
+  {
+    "title": "Paper Mario: The Origami King",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "adventure",
+      "puzzle",
+      "fun",
+      "creative",
+      "rpg"
+    ],
+    "mood": [
+      "whimsical/capriccioso",
+      "charming/affascinante",
+      "playful/giocoso",
+      "curious/curioso",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "Donkey Kong Country: Tropical Freeze",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "platform",
+      "challenging",
+      "music",
+      "retro",
+      "skill"
+    ],
+    "mood": [
+      "energetic/energico",
+      "intense/intenso",
+      "nostalgic/nostalgico",
+      "focused/concentrato",
+      "exciting/emozionante"
+    ]
+  },
+  {
+    "title": "Yoshi's Crafted World",
+    "platform": "Nintendo Switch",
+    "tags": [
+      "platform",
+      "cute",
+      "relaxing",
+      "colorful",
+      "family"
+    ],
+    "mood": [
+      "gentle/dolce",
+      "cozy/accogliente",
+      "happy/felice",
+      "charming/affascinante",
+      "relax/rilassante"
+    ]
+  },
+  {
+    "title": "The Legend of Zelda: Twilight Princess HD",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "adventure",
+      "action",
+      "dark",
+      "epic",
+      "story"
+    ],
+    "mood": [
+      "epic/epico",
+      "intense/intenso",
+      "mysterious/misterioso",
+      "immersive/immersivo",
+      "adventurous/avventuroso"
+    ]
+  },
+  {
+    "title": "Super Mario 3D World",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "platform",
+      "fun",
+      "multiplayer",
+      "colorful",
+      "creative"
+    ],
+    "mood": [
+      "happy/felice",
+      "energetic/energico",
+      "playful/giocoso",
+      "social/sociale",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "Mario Kart 8",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "racing",
+      "fun",
+      "multiplayer",
+      "party",
+      "competitive"
+    ],
+    "mood": [
+      "exciting/emozionante",
+      "festive/festoso",
+      "energetic/energico",
+      "social/sociale",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "Splatoon",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "shooter",
+      "competitive",
+      "colorful",
+      "multiplayer",
+      "action"
+    ],
+    "mood": [
+      "energetic/energico",
+      "intense/intenso",
+      "exciting/emozionante",
+      "vibrant/vivace",
+      "competitive/competitivo"
+    ]
+  },
+  {
+    "title": "Super Smash Bros. for Wii U",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "fighting",
+      "competitive",
+      "multiplayer",
+      "action",
+      "crossover"
+    ],
+    "mood": [
+      "intense/intenso",
+      "competitive/competitivo",
+      "exciting/emozionante",
+      "energetic/energico",
+      "epic/epico"
+    ]
+  },
+  {
+    "title": "Bayonetta 2",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "action",
+      "intense",
+      "stylish",
+      "challenging",
+      "fast-paced"
+    ],
+    "mood": [
+      "intense/intenso",
+      "exciting/emozionante",
+      "energetic/energico",
+      "focused/concentrato",
+      "epic/epico"
+    ]
+  },
+  {
+    "title": "Xenoblade Chronicles X",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "rpg",
+      "epic",
+      "open-world",
+      "sci-fi",
+      "exploration"
+    ],
+    "mood": [
+      "epic/epico",
+      "immersive/immersivo",
+      "adventurous/avventuroso",
+      "thoughtful/riflessivo",
+      "mysterious/misterioso"
+    ]
+  },
+  {
+    "title": "Pikmin 3",
+    "platform": "Nintendo Wii U",
+    "tags": [
+      "strategy",
+      "puzzle",
+      "cute",
+      "exploration",
+      "creative"
+    ],
+    "mood": [
+      "charming/affascinante",
+      "thoughtful/riflessivo",
+      "curious/curioso",
+      "gentle/dolce",
+      "creative/creativo"
+    ]
+  },
+  {
+    "title": "Super Mario Galaxy 2",
+    "platform": "Nintendo Wii",
+    "tags": [
+      "platform",
+      "creative",
+      "fun",
+      "colorful",
+      "adventure"
+    ],
+    "mood": [
+      "happy/felice",
+      "wonder/meraviglia",
+      "playful/giocoso",
+      "curious/curioso",
+      "joyful/gioioso"
+    ]
+  },
+  {
+    "title": "The Legend of Zelda: Skyward Sword",
+    "platform": "Nintendo Wii",
+    "tags": [
+      "adventure",
+      "action",
+      "epic",
+      "story",
+      "puzzle"
+    ],
+    "mood": [
+      "epic/epico",
+      "adventurous/avventuroso",
+      "immersive/immersivo",
+      "mysterious/misterioso",
+      "emotional/emotivo"
+    ]
+  },
+  {
+    "title": "Wii Sports Resort",
+    "platform": "Nintendo Wii",
+    "tags": [
+      "sports",
+      "casual",
+      "motion",
+      "multiplayer",
+      "fun"
+    ],
+    "mood": [
+      "fun/divertente",
+      "social/sociale",
+      "energetic/energico",
+      "casual/informale",
+      "playful/giocoso"
+    ]
+  },
+  {
+    "title": "Xenoblade Chronicles",
+    "platform": "Nintendo Wii",
+    "tags": [
+      "rpg",
+      "epic",
+      "open-world",
+      "story",
+      "adventure"
+    ],
+    "mood": [
+      "epic/epico",
+      "emotional/emotivo",
+      "immersive/immersivo",
+      "adventurous/avventuroso",
+      "thoughtful/riflessivo"
+    ]
+  },
+  {
+    "title": "Metroid Prime 3: Corruption",
+    "platform": "Nintendo Wii",
+    "tags": [
+      "action",
+      "exploration",
+      "sci-fi",
+      "challenging",
+      "atmospheric"
+    ],
+    "mood": [
+      "tense/teso",
+      "intense/intenso",
+      "mysterious/misterioso",
+      "focused/concentrato",
+      "adventurous/avventuroso"
+    ]
+  },
+  {
+    "title": "Super Paper Mario",
+    "platform": "Nintendo Wii",
+    "tags": [
+      "adventure",
+      "puzzle",
+      "fun",
+      "creative",
+      "rpg"
+    ],
+    "mood": [
+      "whimsical/capriccioso",
+      "charming/affascinante",
+      "playful/giocoso",
+      "curious/curioso",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "Pokémon Black 2",
+    "platform": "Nintendo DS",
+    "tags": [
+      "rpg",
+      "adventure",
+      "pokemon",
+      "collection",
+      "story"
+    ],
+    "mood": [
+      "nostalgic/nostalgico",
+      "adventurous/avventuroso",
+      "comfort/confortevole",
+      "curious/curioso",
+      "immersive/immersivo"
+    ]
+  },
+  {
+    "title": "Pokémon HeartGold",
+    "platform": "Nintendo DS",
+    "tags": [
+      "rpg",
+      "nostalgia",
+      "pokemon",
+      "adventure",
+      "collection"
+    ],
+    "mood": [
+      "comfort/confortevole",
+      "relax/rilassante",
+      "retro/retro",
+      "nostalgic/nostalgico",
+      "cozy/accogliente"
+    ]
+  },
+  {
+    "title": "New Super Mario Bros.",
+    "platform": "Nintendo DS",
+    "tags": [
+      "platform",
+      "fun",
+      "retro",
+      "colorful",
+      "classic"
+    ],
+    "mood": [
+      "happy/felice",
+      "nostalgic/nostalgico",
+      "playful/giocoso",
+      "energetic/energico",
+      "fun/divertente"
+    ]
+  },
+  {
+    "title": "The Legend of Zelda: Phantom Hourglass",
+    "platform": "Nintendo DS",
+    "tags": [
+      "adventure",
+      "puzzle",
+      "action",
+      "touch",
+      "story"
+    ],
+    "mood": [
+      "adventurous/avventuroso",
+      "curious/curioso",
+      "immersive/immersivo",
+      "mysterious/misterioso",
+      "epic/epico"
+    ]
+  },
+  {
+    "title": "Animal Crossing: Wild World",
+    "platform": "Nintendo DS",
+    "tags": [
+      "simulation",
+      "relaxing",
+      "creative",
+      "social",
+      "casual"
+    ],
+    "mood": [
+      "calm/tranquillo",
+      "peaceful/pacifico",
+      "cozy/accogliente",
+      "comfort/confortevole",
+      "gentle/dolce"
+    ]
+  },
+  {
+    "title": "Super Mario 64 DS",
+    "platform": "Nintendo DS",
+    "tags": [
+      "platform",
+      "3d",
+      "adventure",
+      "retro",
+      "classic"
+    ],
+    "mood": [
+      "nostalgic/nostalgico",
+      "happy/felice",
+      "playful/giocoso",
+      "curious/curioso",
+      "wonder/meraviglia"
+    ]
+  },
+  {
+    "title": "Pokémon X",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "rpg",
+      "adventure",
+      "pokemon",
+      "3d",
+      "collection"
+    ],
+    "mood": [
+      "adventurous/avventuroso",
+      "nostalgic/nostalgico",
+      "curious/curioso",
+      "comfort/confortevole",
+      "exploration/esplorazione"
+    ]
+  },
+  {
+    "title": "Super Mario 3D Land",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "platform",
+      "3d",
+      "fun",
+      "colorful",
+      "creative"
+    ],
+    "mood": [
+      "happy/felice",
+      "energetic/energico",
+      "playful/giocoso",
+      "curious/curioso",
+      "joyful/gioioso"
+    ]
+  },
+  {
+    "title": "The Legend of Zelda: A Link Between Worlds",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "adventure",
+      "puzzle",
+      "action",
+      "3d",
+      "story"
+    ],
+    "mood": [
+      "adventurous/avventuroso",
+      "curious/curioso",
+      "immersive/immersivo",
+      "mysterious/misterioso",
+      "epic/epico"
+    ]
+  },
+  {
+    "title": "Animal Crossing: New Leaf",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "simulation",
+      "relaxing",
+      "creative",
+      "social",
+      "casual"
+    ],
+    "mood": [
+      "calm/tranquillo",
+      "peaceful/pacifico",
+      "cozy/accogliente",
+      "comfort/confortevole",
+      "gentle/dolce"
+    ]
+  },
+  {
+    "title": "Super Smash Bros. for Nintendo 3DS",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "fighting",
+      "competitive",
+      "multiplayer",
+      "action",
+      "crossover"
+    ],
+    "mood": [
+      "intense/intenso",
+      "competitive/competitivo",
+      "exciting/emozionante",
+      "energetic/energico",
+      "epic/epico"
+    ]
+  },
+  {
+    "title": "Fire Emblem: Awakening",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "strategy",
+      "rpg",
+      "story",
+      "tactical",
+      "deep"
+    ],
+    "mood": [
+      "thoughtful/riflessivo",
+      "strategic/strategico",
+      "immersive/immersivo",
+      "epic/epico",
+      "emotional/emotivo"
+    ]
+  },
+  {
+    "title": "Luigi's Mansion: Dark Moon",
+    "platform": "Nintendo 3DS",
+    "tags": [
+      "adventure",
+      "puzzle",
+      "fun",
+      "spooky",
+      "creative"
+    ],
+    "mood": [
+      "playful/giocoso",
+      "curious/curioso",
+      "charming/affascinante",
+      "whimsical/capriccioso",
+      "fun/divertente"
+    ]
+  }
+]

@@ -1,0 +1,1462 @@
+{
+  "games": [
+    {
+      "title": "The Legend of Zelda: Breath of the Wild",
+      "platform": "Nintendo Switch",
+      "description": "Gioco open-world action-adventure del 2017, sviluppato da Nintendo EPD. Link si risveglia dopo 100 anni di sonno in un Hyrule devastato da Calamity Ganon. Il gioco offre totale libertà di esplorazione senza obiettivi lineari obbligatori.",
+      "gameplay": "Esplorazione libera di un mondo vasto, combattimento con armi che si rompono, crafting di cibo e pozioni, scalata di montagne e alberi, paravela, risoluzione di puzzle nei 120 santuari, cattura e doma di cavalli selvaggi. Nessun sistema di livelli tradizionale, progressione basata su cuori e stamina.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "zelda",
+        "open world",
+        "esplorazione",
+        "azione",
+        "switch",
+        "avventura",
+        "puzzle",
+        "hyrule",
+        "link",
+        "ganon"
+      ],
+      "tags": [
+        "open-world",
+        "exploration",
+        "adventure",
+        "puzzle",
+        "action"
+      ],
+      "mood": [
+        "relax/rilassante",
+        "freedom/libertà",
+        "immersion/immersivo",
+        "epic/epico",
+        "wonder/meraviglia"
+      ]
+    },
+    {
+      "title": "Animal Crossing: New Horizons",
+      "platform": "Nintendo Switch",
+      "description": "Simulazione di vita del 2020 dove il giocatore si trasferisce su un'isola deserta. Gestisci la tua isola, decora la casa, pesca, cattura insetti, interagisci con animali antropomorfi e personalizza tutto secondo i tuoi gusti.",
+      "gameplay": "Gioco in tempo reale sincronizzato con orologio reale, raccolta risorse, crafting di oggetti e mobili, pesca e caccia di insetti, scambio con altri giocatori online, eventi stagionali, progettazione dell'isola con terrazzamento e costruzione di ponti e scale.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Single Player",
+        "Multiplayer Online",
+        "Local Co-op"
+      ],
+      "keywords": [
+        "animal crossing",
+        "simulazione",
+        "isola",
+        "casual",
+        "relax",
+        "decorazione",
+        "nook",
+        "tom nook"
+      ],
+      "tags": [
+        "simulation",
+        "relaxing",
+        "creative",
+        "social",
+        "casual"
+      ],
+      "mood": [
+        "calm/tranquillo",
+        "peaceful/pacifico",
+        "cozy/accogliente",
+        "comfort/confortevole",
+        "gentle/dolce"
+      ]
+    },
+    {
+      "title": "Splatoon 3",
+      "platform": "Nintendo Switch",
+      "description": "Shooter a squadre del 2022 dove giocatori controllano Inklings e Octolings che combattono spruzzando inchiostro. L'obiettivo principale è coprire più territorio possibile con il proprio colore.",
+      "gameplay": "Combattimento a squadre 4v4, modalità Turf War e Ranked (Tower Control, Splat Zones, Rainmaker, Clam Blitz), armi variabili (pistole, rulli, pennelli, fucili), movimento fluido in forma di calamaro, modalità single player con livelli platform, Salmon Run co-op.",
+      "difficulty": "Media → Alta",
+      "modes": [
+        "Multiplayer Online",
+        "Single Player",
+        "Co-op"
+      ],
+      "keywords": [
+        "splatoon",
+        "shooter",
+        "inchiostro",
+        "competitive",
+        "online",
+        "inkling",
+        "octoling",
+        "turf war"
+      ],
+      "tags": [
+        "shooter",
+        "competitive",
+        "colorful",
+        "multiplayer",
+        "action"
+      ],
+      "mood": [
+        "energetic/energico",
+        "intense/intenso",
+        "exciting/emozionante",
+        "vibrant/vivace",
+        "competitive/competitivo"
+      ]
+    },
+    {
+      "title": "Mario Kart 8 Deluxe",
+      "platform": "Nintendo Switch",
+      "description": "Racing game del 2017, versione migliorata di Mario Kart 8 per Wii U. Include tutti i DLC e personaggi aggiuntivi. Il gioco di corse Nintendo più venduto di sempre.",
+      "gameplay": "Kart racing con drifting, turbo, oggetti offensivi e difensivi, 48 circuiti, 42 personaggi, personalizzazione kart/ali/ruote, modalità Battle, multiplayer locale fino a 4 giocatori, online fino a 12, modalità 200cc per esperti.",
+      "difficulty": "Bassa → Alta",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "mario kart",
+        "racing",
+        "kart",
+        "multiplayer",
+        "circuiti",
+        "oggetti",
+        "drift",
+        "battle mode"
+      ],
+      "tags": [
+        "racing",
+        "fun",
+        "multiplayer",
+        "party",
+        "competitive"
+      ],
+      "mood": [
+        "exciting/emozionante",
+        "festive/festoso",
+        "energetic/energico",
+        "social/sociale",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "Super Smash Bros. Ultimate",
+      "platform": "Nintendo Switch",
+      "description": "Picchiaduro crossover del 2018 con oltre 80 personaggi da varie serie Nintendo e non. Combattimento platform fighting dove l'obiettivo è far cadere gli avversari fuori dallo stage.",
+      "gameplay": "Combattimento 1v1, 2v2, free-for-all, oltre 100 stage, 80+ personaggi con movimenti unici, oggetti e assist trophy, modalità World of Light single player, Classic Mode, Home-Run Contest, Eventi, online competitivo e casual.",
+      "difficulty": "Media → Molto Alta",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "smash",
+        "fighting",
+        "crossover",
+        "competitive",
+        "personaggi",
+        "nintendo",
+        "platform fighter"
+      ],
+      "tags": [
+        "fighting",
+        "competitive",
+        "multiplayer",
+        "action",
+        "crossover"
+      ],
+      "mood": [
+        "intense/intenso",
+        "competitive/competitivo",
+        "exciting/emozionante",
+        "energetic/energico",
+        "epic/epico"
+      ]
+    },
+    {
+      "title": "Pokémon Scarlet & Violet",
+      "platform": "Nintendo Switch",
+      "description": "RPG del 2022 ambientato nella regione di Paldea. Primo gioco Pokémon open-world vero, con tre storie parallele: Victory Road, Path of Legends, Starfall Street.",
+      "gameplay": "Esplorazione open-world, cattura Pokémon in tempo reale, battaglie a turni, Terastallizzazione (nuova meccanica), raid Tera, multiplayer fino a 4 giocatori, breeding, competitive online, DLC con nuove aree.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Online",
+        "Co-op"
+      ],
+      "keywords": [
+        "pokemon",
+        "rpg",
+        "open world",
+        "paldea",
+        "cattura",
+        "battaglie",
+        "terastallizzazione",
+        "koraidon",
+        "miraidon"
+      ],
+      "tags": [
+        "rpg",
+        "adventure",
+        "collection",
+        "open-world",
+        "pokemon"
+      ],
+      "mood": [
+        "adventurous/avventuroso",
+        "nostalgic/nostalgico",
+        "curious/curioso",
+        "comfort/confortevole",
+        "exploration/esplorazione"
+      ]
+    },
+    {
+      "title": "Metroid Dread",
+      "platform": "Nintendo Switch",
+      "description": "Action-adventure del 2021, sequel di Metroid Fusion. Samus esplora il pianeta ZDR inseguita da E.M.M.I., robot letali che la uccidono istantaneamente se catturata.",
+      "gameplay": "Esplorazione 2D in stile Metroidvania, combattimento con armi multiple, upgrade progressivi (missili, bombe, varia suit), stealth per evitare E.M.M.I., boss fight epici, mappa interconnessa con backtracking, melee counter.",
+      "difficulty": "Alta",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "metroid",
+        "samus",
+        "metroidvania",
+        "esplorazione",
+        "emmi",
+        "zdr",
+        "action",
+        "sci-fi"
+      ],
+      "tags": [
+        "action",
+        "exploration",
+        "sci-fi",
+        "challenging",
+        "atmospheric"
+      ],
+      "mood": [
+        "tense/teso",
+        "intense/intenso",
+        "mysterious/misterioso",
+        "focused/concentrato",
+        "adventurous/avventuroso"
+      ]
+    },
+    {
+      "title": "Fire Emblem: Three Houses",
+      "platform": "Nintendo Switch",
+      "description": "Strategic RPG del 2019. Il giocatore è un professore all'Accademia Garreg Mach e deve scegliere una delle tre case, influenzando la storia e i personaggi.",
+      "gameplay": "Battaglie tattiche a turni su griglia, gestione studenti e classi, supporti tra personaggi, scelte narrative che cambiano la storia, tre route diverse, battaglie epiche, sistema di permadeath opzionale, DLC con contenuti aggiuntivi.",
+      "difficulty": "Media → Molto Alta",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "fire emblem",
+        "strategic rpg",
+        "tattico",
+        "three houses",
+        "garreg mach",
+        "edelgard",
+        "dimitri",
+        "claude"
+      ],
+      "tags": [
+        "strategy",
+        "rpg",
+        "story",
+        "tactical",
+        "deep"
+      ],
+      "mood": [
+        "thoughtful/riflessivo",
+        "strategic/strategico",
+        "immersive/immersivo",
+        "epic/epico",
+        "emotional/emotivo"
+      ]
+    },
+    {
+      "title": "Luigi's Mansion 3",
+      "platform": "Nintendo Switch",
+      "description": "Action-adventure del 2019. Luigi deve salvare Mario, Peach e i Toad da un hotel infestato usando l'aspirapolvere Poltergust G-00.",
+      "gameplay": "Esplorazione di un hotel a 17 piani, aspirazione fantasmi con Poltergust, risoluzione puzzle, Gooigi (clone di gelatina) per puzzle cooperativi, boss fight unici per piano, multiplayer ScareScraper, collezionabili nascosti.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Co-op"
+      ],
+      "keywords": [
+        "luigi",
+        "mansion",
+        "fantasmi",
+        "poltergust",
+        "gooigi",
+        "hotel",
+        "puzzle",
+        "aspirazione"
+      ],
+      "tags": [
+        "adventure",
+        "puzzle",
+        "fun",
+        "spooky",
+        "creative"
+      ],
+      "mood": [
+        "playful/giocoso",
+        "curious/curioso",
+        "charming/affascinante",
+        "whimsical/capriccioso",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "Xenoblade Chronicles 3",
+      "platform": "Nintendo Switch",
+      "description": "RPG open-world del 2022. Due nazioni in guerra eterna, Keves e Agnus, devono unirsi per sopravvivere. Combina elementi dei precedenti Xenoblade.",
+      "gameplay": "Combat a tempo reale con auto-attack, sistema di classi intercambiabili, Ouroboros fusion per trasformazioni, esplorazione di mondi vasti, side quest approfondite, crafting, sistema di eroi recruitable, battaglie epiche contro titani.",
+      "difficulty": "Media → Alta",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "xenoblade",
+        "rpg",
+        "open world",
+        "keves",
+        "agnus",
+        "ouroboros",
+        "noah",
+        "mio",
+        "combat system"
+      ],
+      "tags": [
+        "rpg",
+        "epic",
+        "story",
+        "adventure",
+        "open-world"
+      ],
+      "mood": [
+        "epic/epico",
+        "emotional/emotivo",
+        "immersive/immersivo",
+        "adventurous/avventuroso",
+        "thoughtful/riflessivo"
+      ]
+    },
+    {
+      "title": "Mario Party Superstars",
+      "platform": "Nintendo Switch",
+      "description": "Party game del 2021 con 100 minigiochi classici dai primi tre Mario Party per N64. Include 5 board classici rimasterizzati.",
+      "gameplay": "Board game a turni, 100 minigiochi da Mario Party 1-3, multiplayer locale fino a 4 giocatori, online multiplayer, modalità Mt. Minigames, regole classiche e moderne, dadi personalizzati, stelle e monete.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "mario party",
+        "party game",
+        "minigiochi",
+        "board",
+        "multiplayer",
+        "n64",
+        "classico"
+      ],
+      "tags": [
+        "party",
+        "fun",
+        "multiplayer",
+        "casual",
+        "social"
+      ],
+      "mood": [
+        "festive/festoso",
+        "social/sociale",
+        "fun/divertente",
+        "energetic/energico",
+        "playful/giocoso"
+      ]
+    },
+    {
+      "title": "Pikmin 4",
+      "platform": "Nintendo Switch",
+      "description": "Strategy game del 2023. Il giocatore controlla un astronauta che usa Pikmin per esplorare un pianeta, raccogliere tesori e salvare membri dell'equipaggio.",
+      "gameplay": "Gestione di Pikmin colorati con abilità diverse, esplorazione di aree diurne, gestione del tempo, combattimento contro creature, risoluzione puzzle, Oatchi (cane Pikmin), modalità Dandori (sfide a tempo), collezionabili.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player",
+        "Local Co-op"
+      ],
+      "keywords": [
+        "pikmin",
+        "strategy",
+        "esplorazione",
+        "oatchi",
+        "pikmin colorati",
+        "dandori",
+        "tesori"
+      ],
+      "tags": [
+        "strategy",
+        "puzzle",
+        "cute",
+        "exploration",
+        "creative"
+      ],
+      "mood": [
+        "charming/affascinante",
+        "thoughtful/riflessivo",
+        "curious/curioso",
+        "gentle/dolce",
+        "creative/creativo"
+      ]
+    },
+    {
+      "title": "Paper Mario: The Origami King",
+      "platform": "Nintendo Switch",
+      "description": "RPG del 2020. Mario deve salvare il regno dei funghi da Re Olly che ha trasformato tutti in origami. Combina elementi RPG con puzzle.",
+      "gameplay": "Esplorazione con combattimenti a puzzle circolari, sistema di battaglia unico con allineamento anelli, partner temporanei, collezionabili, boss fight con meccaniche speciali, minigiochi, aree segrete, storia lineare con momenti comici.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "paper mario",
+        "origami",
+        "rpg",
+        "puzzle",
+        "re olly",
+        "anelli",
+        "battaglia circolare"
+      ],
+      "tags": [
+        "adventure",
+        "puzzle",
+        "fun",
+        "creative",
+        "rpg"
+      ],
+      "mood": [
+        "whimsical/capriccioso",
+        "charming/affascinante",
+        "playful/giocoso",
+        "curious/curioso",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "Donkey Kong Country: Tropical Freeze",
+      "platform": "Nintendo Switch",
+      "description": "Platform 2D del 2018 (port da Wii U). Donkey Kong e amici devono riconquistare la loro isola dai vichinghi Snowmads.",
+      "gameplay": "Platforming 2D preciso e difficile, 6 personaggi giocabili con abilità diverse, livelli con meccaniche uniche, collezionabili KONG, boss fight epici, modalità Funky Mode per principianti, musica orchestrale eccezionale.",
+      "difficulty": "Alta",
+      "modes": [
+        "Single Player",
+        "Local Co-op"
+      ],
+      "keywords": [
+        "donkey kong",
+        "platform",
+        "2d",
+        "tropical freeze",
+        "snowmads",
+        "diddy kong",
+        "funky mode"
+      ],
+      "tags": [
+        "platform",
+        "challenging",
+        "music",
+        "retro",
+        "skill"
+      ],
+      "mood": [
+        "energetic/energico",
+        "intense/intenso",
+        "nostalgic/nostalgico",
+        "focused/concentrato",
+        "exciting/emozionante"
+      ]
+    },
+    {
+      "title": "Yoshi's Crafted World",
+      "platform": "Nintendo Switch",
+      "description": "Platform 2.5D del 2019. Yoshi esplora un mondo fatto di materiali artigianali per recuperare gemme magiche rubate da Kamek.",
+      "gameplay": "Platforming con meccanica di lancio uova, livelli giocabili in avanti e indietro, collezionabili fiori e gemme, trasformazioni Yoshi, co-op locale, modalità Mellow per principianti, estetica artigianale unica.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Single Player",
+        "Local Co-op"
+      ],
+      "keywords": [
+        "yoshi",
+        "platform",
+        "crafted",
+        "uova",
+        "kamek",
+        "gemme",
+        "fiori",
+        "mellow mode"
+      ],
+      "tags": [
+        "platform",
+        "cute",
+        "relaxing",
+        "colorful",
+        "family"
+      ],
+      "mood": [
+        "gentle/dolce",
+        "cozy/accogliente",
+        "happy/felice",
+        "charming/affascinante",
+        "relax/rilassante"
+      ]
+    },
+    {
+      "title": "The Legend of Zelda: Twilight Princess HD",
+      "platform": "Nintendo Wii U",
+      "description": "Remaster HD del 2006. Link deve salvare Hyrule dalla dimensione oscura Twilight Realm. Stile più realistico e maturo rispetto ad altri Zelda.",
+      "gameplay": "Avventura lineare con elementi open-world, combattimento con spada e scudo, trasformazione in lupo, puzzle nei dungeon, cavalcatura Epona, fishing, minigiochi, collezionabili, boss fight epici.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "zelda",
+        "twilight princess",
+        "link",
+        "lupo",
+        "epona",
+        "midna",
+        "hyrule",
+        "dungeon"
+      ],
+      "tags": [
+        "adventure",
+        "action",
+        "dark",
+        "epic",
+        "story"
+      ],
+      "mood": [
+        "epic/epico",
+        "intense/intenso",
+        "mysterious/misterioso",
+        "immersive/immersivo",
+        "adventurous/avventuroso"
+      ]
+    },
+    {
+      "title": "Super Mario 3D World",
+      "platform": "Nintendo Wii U",
+      "description": "Platform 3D del 2013. Mario, Luigi, Peach e Toad devono salvare le principesse Sprixie dal re Bowser in mondi tematici.",
+      "gameplay": "Platforming 3D con livelli lineari, 4 personaggi con abilità diverse, power-up unici (Super Bell per gatto Mario), multiplayer fino a 4 giocatori, timer per sfida, livelli segreti, Bowser's Fury incluso nella versione Switch.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local"
+      ],
+      "keywords": [
+        "mario",
+        "3d world",
+        "sprixie",
+        "gatto mario",
+        "multiplayer",
+        "bowser",
+        "peach",
+        "luigi"
+      ],
+      "tags": [
+        "platform",
+        "fun",
+        "multiplayer",
+        "colorful",
+        "creative"
+      ],
+      "mood": [
+        "happy/felice",
+        "energetic/energico",
+        "playful/giocoso",
+        "social/sociale",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "Mario Kart 8",
+      "platform": "Nintendo Wii U",
+      "description": "Racing game del 2014, predecessore di Deluxe. Include DLC con circuiti e personaggi aggiuntivi. Grafica HD migliorata.",
+      "gameplay": "Kart racing con drifting, turbo, oggetti, 32 circuiti base, DLC aggiuntivi, 30 personaggi, personalizzazione veicoli, multiplayer locale e online, modalità Battle, anti-gravity sections.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "mario kart",
+        "racing",
+        "wii u",
+        "dlc",
+        "circuiti",
+        "oggetti",
+        "drift"
+      ],
+      "tags": [
+        "racing",
+        "fun",
+        "multiplayer",
+        "party",
+        "competitive"
+      ],
+      "mood": [
+        "exciting/emozionante",
+        "festive/festoso",
+        "energetic/energico",
+        "social/sociale",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "Splatoon",
+      "platform": "Nintendo Wii U",
+      "description": "Shooter originale del 2015. Prima iterazione della serie che introduce il concetto di combattimento con inchiostro.",
+      "gameplay": "Turf War 4v4, armi base, modalità single player con livelli platform, modalità Battle, armi speciali, personalizzazione equipaggiamento, mappe rotanti ogni poche ore, Splatfest eventi.",
+      "difficulty": "Media",
+      "modes": [
+        "Multiplayer Online",
+        "Single Player"
+      ],
+      "keywords": [
+        "splatoon",
+        "wii u",
+        "shooter",
+        "inchiostro",
+        "turf war",
+        "inkling",
+        "splatfest"
+      ],
+      "tags": [
+        "shooter",
+        "competitive",
+        "colorful",
+        "multiplayer",
+        "action"
+      ],
+      "mood": [
+        "energetic/energico",
+        "intense/intenso",
+        "exciting/emozionante",
+        "vibrant/vivace",
+        "competitive/competitivo"
+      ]
+    },
+    {
+      "title": "Super Smash Bros. for Wii U",
+      "platform": "Nintendo Wii U",
+      "description": "Picchiaduro del 2014 con 58 personaggi. Versione console del gioco 3DS con grafica migliorata e stage unici.",
+      "gameplay": "Combattimento platform fighting, 8-player Smash, stage unici per Wii U, modalità Eventi, Master Orders, Crazy Orders, online multiplayer, Amiibo support, Custom Moves.",
+      "difficulty": "Media → Alta",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "smash",
+        "wii u",
+        "fighting",
+        "8 player",
+        "amiibo",
+        "custom moves",
+        "eventi"
+      ],
+      "tags": [
+        "fighting",
+        "competitive",
+        "multiplayer",
+        "action",
+        "crossover"
+      ],
+      "mood": [
+        "intense/intenso",
+        "competitive/competitivo",
+        "exciting/emozionante",
+        "energetic/energico",
+        "epic/epico"
+      ]
+    },
+    {
+      "title": "Bayonetta 2",
+      "platform": "Nintendo Wii U",
+      "description": "Action hack-and-slash del 2014. Bayonetta deve salvare l'anima di Jeanne dal Paradiso combattendo angeli e demoni.",
+      "gameplay": "Combattimento fluido con combo, Witch Time (rallentamento tempo), torture attacks, armi multiple, trasformazioni animali, multiplayer Tag Climax, grafica migliorata, sistema di ranking.",
+      "difficulty": "Media → Alta",
+      "modes": [
+        "Single Player",
+        "Multiplayer Co-op"
+      ],
+      "keywords": [
+        "bayonetta",
+        "action",
+        "hack slash",
+        "witch time",
+        "jeanne",
+        "angeli",
+        "combo"
+      ],
+      "tags": [
+        "action",
+        "intense",
+        "stylish",
+        "challenging",
+        "fast-paced"
+      ],
+      "mood": [
+        "intense/intenso",
+        "exciting/emozionante",
+        "energetic/energico",
+        "focused/concentrato",
+        "epic/epico"
+      ]
+    },
+    {
+      "title": "Xenoblade Chronicles X",
+      "platform": "Nintendo Wii U",
+      "description": "RPG open-world del 2015. Il giocatore esplora il pianeta Mira dopo la distruzione della Terra, pilotando mech chiamati Skell.",
+      "gameplay": "Open-world immenso, combattimento a tempo reale, pilotaggio Skell (mech), creazione personaggio, side quest numerose, esplorazione verticale, multiplayer online opzionale, sistema di classi, crafting.",
+      "difficulty": "Alta",
+      "modes": [
+        "Single Player",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "xenoblade",
+        "x",
+        "open world",
+        "skell",
+        "mira",
+        "mech",
+        "rpg",
+        "esplorazione"
+      ],
+      "tags": [
+        "rpg",
+        "epic",
+        "open-world",
+        "sci-fi",
+        "exploration"
+      ],
+      "mood": [
+        "epic/epico",
+        "immersive/immersivo",
+        "adventurous/avventuroso",
+        "thoughtful/riflessivo",
+        "mysterious/misterioso"
+      ]
+    },
+    {
+      "title": "Pikmin 3",
+      "platform": "Nintendo Wii U",
+      "description": "Strategy game del 2013. Tre astronauti devono raccogliere frutta per salvare il loro pianeta usando Pikmin.",
+      "gameplay": "Gestione Pikmin con 3 capitani, gestione tempo limitato, esplorazione di aree, combattimento boss, risoluzione puzzle, collezionabili frutta, modalità Missioni, modalità Bingo Battle multiplayer.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local"
+      ],
+      "keywords": [
+        "pikmin",
+        "3",
+        "wii u",
+        "strategy",
+        "frutta",
+        "capitani",
+        "bingo battle",
+        "missioni"
+      ],
+      "tags": [
+        "strategy",
+        "puzzle",
+        "cute",
+        "exploration",
+        "creative"
+      ],
+      "mood": [
+        "charming/affascinante",
+        "thoughtful/riflessivo",
+        "curious/curioso",
+        "gentle/dolce",
+        "creative/creativo"
+      ]
+    },
+    {
+      "title": "Super Mario Galaxy 2",
+      "platform": "Nintendo Wii",
+      "description": "Platform 3D del 2010. Mario viaggia attraverso galassie per salvare Peach. Sequel migliorato del primo Galaxy.",
+      "gameplay": "Platforming 3D con gravità, raccolta Power Star, Yoshi come cavalcatura, livelli creativi e vari, controlli motion con Wiimote, co-op assist, 242 Power Star totali, boss fight epici.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Co-op Assist"
+      ],
+      "keywords": [
+        "mario",
+        "galaxy",
+        "wii",
+        "power star",
+        "yoshi",
+        "gravita",
+        "galassie",
+        "rosalina"
+      ],
+      "tags": [
+        "platform",
+        "creative",
+        "fun",
+        "colorful",
+        "adventure"
+      ],
+      "mood": [
+        "happy/felice",
+        "wonder/meraviglia",
+        "playful/giocoso",
+        "curious/curioso",
+        "joyful/gioioso"
+      ]
+    },
+    {
+      "title": "The Legend of Zelda: Skyward Sword",
+      "platform": "Nintendo Wii",
+      "description": "Avventura del 2011. Link deve salvare Zelda e scoprire le origini della Master Sword. Primo Zelda nella timeline.",
+      "gameplay": "Combattimento con motion controls precisi, esplorazione di cielo e terra, dungeon con temi unici, upgrade armi, volo con Loftwing, time shift stones, collezionabili, boss fight con meccaniche motion.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "zelda",
+        "skyward sword",
+        "wii",
+        "motion",
+        "loftwing",
+        "master sword",
+        "timeline",
+        "origini"
+      ],
+      "tags": [
+        "adventure",
+        "action",
+        "epic",
+        "story",
+        "puzzle"
+      ],
+      "mood": [
+        "epic/epico",
+        "adventurous/avventuroso",
+        "immersive/immersivo",
+        "mysterious/misterioso",
+        "emotional/emotivo"
+      ]
+    },
+    {
+      "title": "Wii Sports Resort",
+      "platform": "Nintendo Wii",
+      "description": "Sports collection del 2009. Include 12 sport diversi da praticare sull'isola Wuhu usando Wii MotionPlus.",
+      "gameplay": "12 sport diversi (swordplay, archery, basketball, etc.), controlli motion precisi con MotionPlus, multiplayer locale, Mii personalizzati, modalità libera e sfide, collezionabili, minigiochi.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local"
+      ],
+      "keywords": [
+        "wii sports",
+        "resort",
+        "motion plus",
+        "wuhu",
+        "sport",
+        "mii",
+        "swordplay",
+        "archery"
+      ],
+      "tags": [
+        "sports",
+        "casual",
+        "motion",
+        "multiplayer",
+        "fun"
+      ],
+      "mood": [
+        "fun/divertente",
+        "social/sociale",
+        "energetic/energico",
+        "casual/informale",
+        "playful/giocoso"
+      ]
+    },
+    {
+      "title": "Xenoblade Chronicles",
+      "platform": "Nintendo Wii",
+      "description": "RPG del 2010. Shulk deve usare la Monado per cambiare il futuro e salvare il mondo dai Mechon.",
+      "gameplay": "Combat a tempo reale con auto-attack, sistema di visioni del futuro, esplorazione di mondi vasti, side quest numerose, sistema di affinità, crafting gemme, battaglie epiche, storia profonda.",
+      "difficulty": "Media → Alta",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "xenoblade",
+        "chronicles",
+        "wii",
+        "shulk",
+        "monado",
+        "mechon",
+        "visioni",
+        "rpg"
+      ],
+      "tags": [
+        "rpg",
+        "epic",
+        "open-world",
+        "story",
+        "adventure"
+      ],
+      "mood": [
+        "epic/epico",
+        "emotional/emotivo",
+        "immersive/immersivo",
+        "adventurous/avventuroso",
+        "thoughtful/riflessivo"
+      ]
+    },
+    {
+      "title": "Metroid Prime 3: Corruption",
+      "platform": "Nintendo Wii",
+      "description": "FPS in prima persona del 2007. Samus deve fermare Phazon corruption che minaccia la galassia.",
+      "gameplay": "FPS con controlli motion, esplorazione 3D, scan visor per informazioni, upgrade progressivi, boss fight epici, gestione Phazon, viaggi tra pianeti, collezionabili, grafica migliorata.",
+      "difficulty": "Alta",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "metroid",
+        "prime",
+        "corruption",
+        "wii",
+        "fps",
+        "phazon",
+        "samus",
+        "motion controls"
+      ],
+      "tags": [
+        "action",
+        "exploration",
+        "sci-fi",
+        "challenging",
+        "atmospheric"
+      ],
+      "mood": [
+        "tense/teso",
+        "intense/intenso",
+        "mysterious/misterioso",
+        "focused/concentrato",
+        "adventurous/avventuroso"
+      ]
+    },
+    {
+      "title": "Super Paper Mario",
+      "platform": "Nintendo Wii",
+      "description": "RPG/Platform del 2007. Mario deve raccogliere Pure Hearts per fermare Count Bleck e salvare tutti gli universi.",
+      "gameplay": "Mix di platform 2D e 3D, meccanica flip per cambiare dimensione, partner con abilità uniche, battaglie a turni semplificate, storia profonda, collezionabili, minigiochi, puzzle.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "paper mario",
+        "wii",
+        "rpg",
+        "platform",
+        "flip",
+        "pure hearts",
+        "count bleck",
+        "universi"
+      ],
+      "tags": [
+        "adventure",
+        "puzzle",
+        "fun",
+        "creative",
+        "rpg"
+      ],
+      "mood": [
+        "whimsical/capriccioso",
+        "charming/affascinante",
+        "playful/giocoso",
+        "curious/curioso",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "Pokémon Black 2",
+      "platform": "Nintendo DS",
+      "description": "RPG del 2012, sequel di Black. Due anni dopo gli eventi del primo gioco, nuova storia nella regione di Unova.",
+      "gameplay": "Cattura e battaglie Pokémon, esplorazione di Unova rivisitata, nuovo Pokédex, World Tournament, Join Avenue, Pokéstar Studios, modalità Challenge Mode, 300+ Pokémon catturabili.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "pokemon",
+        "black 2",
+        "ds",
+        "unova",
+        "world tournament",
+        "join avenue",
+        "challenge mode"
+      ],
+      "tags": [
+        "rpg",
+        "adventure",
+        "pokemon",
+        "collection",
+        "story"
+      ],
+      "mood": [
+        "nostalgic/nostalgico",
+        "adventurous/avventuroso",
+        "comfort/confortevole",
+        "curious/curioso",
+        "immersive/immersivo"
+      ]
+    },
+    {
+      "title": "Pokémon HeartGold",
+      "platform": "Nintendo DS",
+      "description": "Remake del 2009 di Gold. Include la regione di Johto e Kanto, con Pokémon che seguono il giocatore.",
+      "gameplay": "Cattura e battaglie, due regioni complete, Pokémon che camminano dietro di te, Pokéwalker accessory, Battle Frontier, Safari Zone, eventi speciali, 16 badge totali, sistema giorno/notte.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "pokemon",
+        "heartgold",
+        "ds",
+        "johto",
+        "kanto",
+        "pokewalker",
+        "battle frontier",
+        "16 badge"
+      ],
+      "tags": [
+        "rpg",
+        "nostalgia",
+        "pokemon",
+        "adventure",
+        "collection"
+      ],
+      "mood": [
+        "comfort/confortevole",
+        "relax/rilassante",
+        "retro/retro",
+        "nostalgic/nostalgico",
+        "cozy/accogliente"
+      ]
+    },
+    {
+      "title": "New Super Mario Bros.",
+      "platform": "Nintendo DS",
+      "description": "Platform 2D del 2006. Ritorno al gameplay classico di Mario in stile 2D con grafica 3D.",
+      "gameplay": "Platforming 2D classico, power-up (Mushroom, Fire Flower, Super Star, Mega Mushroom, Mini Mushroom), 80 livelli, multiplayer competitivo, minigiochi, controlli touch opzionali.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local"
+      ],
+      "keywords": [
+        "mario",
+        "new super mario bros",
+        "ds",
+        "2d",
+        "platform",
+        "power up",
+        "multiplayer"
+      ],
+      "tags": [
+        "platform",
+        "fun",
+        "retro",
+        "colorful",
+        "classic"
+      ],
+      "mood": [
+        "happy/felice",
+        "nostalgic/nostalgico",
+        "playful/giocoso",
+        "energetic/energico",
+        "fun/divertente"
+      ]
+    },
+    {
+      "title": "The Legend of Zelda: Phantom Hourglass",
+      "platform": "Nintendo DS",
+      "description": "Avventura del 2007. Link naviga tra isole per salvare Tetra dai fantasmi del Tempio del Re del Mare.",
+      "gameplay": "Controlli touch screen, navigazione con nave, esplorazione dungeon, risoluzione puzzle con touch, annotazioni sulla mappa, combattimento touch-based, ritorni al Tempio del Re del Mare, boss fight.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "zelda",
+        "phantom hourglass",
+        "ds",
+        "touch",
+        "nave",
+        "tempio re mare",
+        "tetra",
+        "fantasmi"
+      ],
+      "tags": [
+        "adventure",
+        "puzzle",
+        "action",
+        "touch",
+        "story"
+      ],
+      "mood": [
+        "adventurous/avventuroso",
+        "curious/curioso",
+        "immersive/immersivo",
+        "mysterious/misterioso",
+        "epic/epico"
+      ]
+    },
+    {
+      "title": "Animal Crossing: Wild World",
+      "platform": "Nintendo DS",
+      "description": "Simulazione di vita del 2005. Gestisci il tuo villaggio, decora casa, interagisci con animali, prima versione con online.",
+      "gameplay": "Gestione villaggio, pesca, caccia insetti, fossili, decorazione casa, interazioni con animali, online multiplayer via WiFi, eventi stagionali, collezionabili, Nook's store.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Single Player",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "animal crossing",
+        "wild world",
+        "ds",
+        "villaggio",
+        "online",
+        "nook",
+        "animali",
+        "collezionabili"
+      ],
+      "tags": [
+        "simulation",
+        "relaxing",
+        "creative",
+        "social",
+        "casual"
+      ],
+      "mood": [
+        "calm/tranquillo",
+        "peaceful/pacifico",
+        "cozy/accogliente",
+        "comfort/confortevole",
+        "gentle/dolce"
+      ]
+    },
+    {
+      "title": "Super Mario 64 DS",
+      "platform": "Nintendo DS",
+      "description": "Remake del 2004 di Mario 64. Include 4 personaggi giocabili e 30 Power Star aggiuntivi.",
+      "gameplay": "Platforming 3D, 4 personaggi (Mario, Luigi, Wario, Yoshi) con abilità diverse, 150 Power Star, minigiochi touch, multiplayer competitivo, controlli con D-pad o touch.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local"
+      ],
+      "keywords": [
+        "mario",
+        "64",
+        "ds",
+        "3d",
+        "power star",
+        "luigi",
+        "wario",
+        "yoshi",
+        "minigiochi"
+      ],
+      "tags": [
+        "platform",
+        "3d",
+        "adventure",
+        "retro",
+        "classic"
+      ],
+      "mood": [
+        "nostalgic/nostalgico",
+        "happy/felice",
+        "playful/giocoso",
+        "curious/curioso",
+        "wonder/meraviglia"
+      ]
+    },
+    {
+      "title": "Pokémon X",
+      "platform": "Nintendo 3DS",
+      "description": "RPG del 2013. Primo Pokémon in 3D, introduce Mega Evolution e Fairy type. Ambientato a Kalos.",
+      "gameplay": "Cattura e battaglie in 3D, Mega Evolution, Fairy type, 3D stereoscopico, online features migliorate, Amie per interagire con Pokémon, Super Training, 72 nuovi Pokémon.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "pokemon",
+        "x",
+        "3ds",
+        "kalos",
+        "mega evolution",
+        "fairy",
+        "3d",
+        "amie"
+      ],
+      "tags": [
+        "rpg",
+        "adventure",
+        "pokemon",
+        "3d",
+        "collection"
+      ],
+      "mood": [
+        "adventurous/avventuroso",
+        "nostalgic/nostalgico",
+        "curious/curioso",
+        "comfort/confortevole",
+        "exploration/esplorazione"
+      ]
+    },
+    {
+      "title": "Super Mario 3D Land",
+      "platform": "Nintendo 3DS",
+      "description": "Platform 3D del 2011. Combina gameplay 2D e 3D, progettato per mostrare le capacità 3D del sistema.",
+      "gameplay": "Platforming 3D con livelli lineari, uso 3D stereoscopico per depth perception, power-up (Super Leaf, Boomerang), 80+ livelli, StreetPass features, controlli precisi.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "mario",
+        "3d land",
+        "3ds",
+        "stereoscopico",
+        "super leaf",
+        "streetpass",
+        "depth"
+      ],
+      "tags": [
+        "platform",
+        "3d",
+        "fun",
+        "colorful",
+        "creative"
+      ],
+      "mood": [
+        "happy/felice",
+        "energetic/energico",
+        "playful/giocoso",
+        "curious/curioso",
+        "joyful/gioioso"
+      ]
+    },
+    {
+      "title": "The Legend of Zelda: A Link Between Worlds",
+      "platform": "Nintendo 3DS",
+      "description": "Avventura del 2013. Sequel spirituale di A Link to the Past, Link può fondersi con i muri per esplorare.",
+      "gameplay": "Meccanica di fusione con muri, dungeon non lineari, no-item rental system, esplorazione di Hyrule e Lorule, boss fight, collezionabili, Hero Mode, grafica 2.5D.",
+      "difficulty": "Media",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "zelda",
+        "link between worlds",
+        "3ds",
+        "fusione",
+        "lorule",
+        "hyrule",
+        "no item",
+        "hero mode"
+      ],
+      "tags": [
+        "adventure",
+        "puzzle",
+        "action",
+        "3d",
+        "story"
+      ],
+      "mood": [
+        "adventurous/avventuroso",
+        "curious/curioso",
+        "immersive/immersivo",
+        "mysterious/misterioso",
+        "epic/epico"
+      ]
+    },
+    {
+      "title": "Animal Crossing: New Leaf",
+      "platform": "Nintendo 3DS",
+      "description": "Simulazione del 2012. Il giocatore diventa sindaco del villaggio e può costruire progetti pubblici.",
+      "gameplay": "Gestione villaggio come sindaco, progetti pubblici, Main Street con negozi, online multiplayer, eventi stagionali, collezionabili, decorazione casa, interazioni animali, Dream Suite.",
+      "difficulty": "Bassa",
+      "modes": [
+        "Single Player",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "animal crossing",
+        "new leaf",
+        "3ds",
+        "sindaco",
+        "progetti",
+        "main street",
+        "dream suite"
+      ],
+      "tags": [
+        "simulation",
+        "relaxing",
+        "creative",
+        "social",
+        "casual"
+      ],
+      "mood": [
+        "calm/tranquillo",
+        "peaceful/pacifico",
+        "cozy/accogliente",
+        "comfort/confortevole",
+        "gentle/dolce"
+      ]
+    },
+    {
+      "title": "Super Smash Bros. for Nintendo 3DS",
+      "platform": "Nintendo 3DS",
+      "description": "Picchiaduro del 2014. Versione portatile con stage e modalità uniche per 3DS.",
+      "gameplay": "Combattimento platform fighting, Smash Run mode, stage portatili, online multiplayer, StreetPass, Custom Moves, 50 personaggi, eventi, Home-Run Contest.",
+      "difficulty": "Media → Alta",
+      "modes": [
+        "Single Player",
+        "Multiplayer Local",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "smash",
+        "3ds",
+        "fighting",
+        "smash run",
+        "streetpass",
+        "custom moves",
+        "portatile"
+      ],
+      "tags": [
+        "fighting",
+        "competitive",
+        "multiplayer",
+        "action",
+        "crossover"
+      ],
+      "mood": [
+        "intense/intenso",
+        "competitive/competitivo",
+        "exciting/emozionante",
+        "energetic/energico",
+        "epic/epico"
+      ]
+    },
+    {
+      "title": "Fire Emblem: Awakening",
+      "platform": "Nintendo 3DS",
+      "description": "Strategic RPG del 2012. Chrom e il giocatore devono fermare il risveglio di Grima.",
+      "gameplay": "Battaglie tattiche a turni, sistema di supporti e matrimoni, permadeath opzionale, DLC numerosi, classi multiple, battaglie epiche, storia con scelte, StreetPass features.",
+      "difficulty": "Media → Molto Alta",
+      "modes": [
+        "Single Player"
+      ],
+      "keywords": [
+        "fire emblem",
+        "awakening",
+        "3ds",
+        "chrom",
+        "grima",
+        "supporti",
+        "permadeath",
+        "dlc"
+      ],
+      "tags": [
+        "strategy",
+        "rpg",
+        "story",
+        "tactical",
+        "deep"
+      ],
+      "mood": [
+        "thoughtful/riflessivo",
+        "strategic/strategico",
+        "immersive/immersivo",
+        "epic/epico",
+        "emotional/emotivo"
+      ]
+    },
+    {
+      "title": "Luigi's Mansion: Dark Moon",
+      "platform": "Nintendo 3DS",
+      "description": "Action-adventure del 2013. Luigi deve catturare fantasmi in 5 ville diverse usando Poltergust 5000.",
+      "gameplay": "Esplorazione di 5 ville, aspirazione fantasmi, risoluzione puzzle, boss fight per villa, multiplayer ScareScraper, collezionabili, upgrade Poltergust, controlli migliorati.",
+      "difficulty": "Bassa → Media",
+      "modes": [
+        "Single Player",
+        "Multiplayer Online"
+      ],
+      "keywords": [
+        "luigi",
+        "mansion",
+        "dark moon",
+        "3ds",
+        "poltergust",
+        "scarescraper",
+        "ville",
+        "fantasmi"
+      ],
+      "tags": [
+        "adventure",
+        "puzzle",
+        "fun",
+        "spooky",
+        "creative"
+      ],
+      "mood": [
+        "playful/giocoso",
+        "curious/curioso",
+        "charming/affascinante",
+        "whimsical/capriccioso",
+        "fun/divertente"
+      ]
+    }
+  ]
+}
