@@ -134,7 +134,8 @@ STILE E TONO
 
 - Entusiasta e appassionato come un vero fan Nintendo
 - Colloquiale ma informativo e dettagliato
-- Usa emoji quando appropriato (🎮, ⭐, 💫, 🎯, ✨)
+- USA EMOJI nelle risposte: aggiungi emoji appropriate per rendere le risposte più vivaci (🎮, ⭐, 💫, 🎯, ✨, 🎭, 🗡️, 🍄, ⚡, 👾, ecc.)
+- Le emoji rendono le risposte più coinvolgenti e piacevoli da leggere
 - Struttura le risposte con paragrafi chiari e coinvolgenti
 - Quando consigli un gioco, spiega COSA lo rende speciale e PERCHÉ è adatto
 - Non essere generico: sii specifico su gameplay, meccaniche, esperienza
@@ -217,7 +218,7 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
             options = {
                 "temperature": 0.8,
                 "top_p": 0.9,
-                "num_predict": 800,  # Aumentato per risposte complete e non tagliate
+                "num_predict": 1200,  # Aumentato per risposte complete e non tagliate
                 "repeat_penalty": 1.1,
                 "stop": []  # Rimuovi stop tokens per permettere risposte più lunghe
             }

@@ -668,12 +668,14 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False, 
                             not '1x1' in src.lower() and
                             not 'pixel' in src.lower() and
                             len(src) > 20):
-                            image_url = src
+                            image_url = src.strip()  # Rimuovi whitespace e newline
                             # Se è un URL relativo, convertilo in assoluto
                             if image_url.startswith('//'):
                                 image_url = 'https:' + image_url
                             elif image_url.startswith('/'):
                                 image_url = f'https://{fandom_name}.fandom.com' + image_url
+                            # Rimuovi eventuali newline o spazi dall'URL
+                            image_url = image_url.replace('\n', '').replace('\r', '').replace(' ', '')
                             logger.info(f"Immagine trovata nell'infobox: {image_url}")
                 
                 # Se non trovata nell'infobox, cerca nella pagina principale
@@ -699,22 +701,26 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False, 
                                         w = int(str(width).replace('px', ''))
                                         h = int(str(height).replace('px', ''))
                                         if w > 100 and h > 100:  # Almeno 100x100px
-                                            image_url = src
+                                            image_url = src.strip()  # Rimuovi whitespace e newline
                                             if image_url.startswith('//'):
                                                 image_url = 'https:' + image_url
                                             elif image_url.startswith('/'):
                                                 image_url = f'https://{fandom_name}.fandom.com' + image_url
+                                            # Rimuovi eventuali newline o spazi dall'URL
+                                            image_url = image_url.replace('\n', '').replace('\r', '').replace(' ', '')
                                             logger.info(f"Immagine trovata nella pagina: {image_url}")
                                             break
                                     except:
                                         pass
                                 else:
                                     # Se non ha dimensioni specificate, prova comunque (ma solo se non è placeholder)
-                                    image_url = src
+                                    image_url = src.strip()  # Rimuovi whitespace e newline
                                     if image_url.startswith('//'):
                                         image_url = 'https:' + image_url
                                     elif image_url.startswith('/'):
                                         image_url = f'https://{fandom_name}.fandom.com' + image_url
+                                    # Rimuovi eventuali newline o spazi dall'URL
+                                    image_url = image_url.replace('\n', '').replace('\r', '').replace(' ', '')
                                     logger.info(f"Immagine trovata nella pagina (senza dimensioni): {image_url}")
                                     break
                 

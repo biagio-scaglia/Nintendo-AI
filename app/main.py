@@ -146,6 +146,9 @@ async def chat_endpoint(payload: ChatRequest):
                         # Crea GameInfo SOLO se c'è un'immagine da mostrare
                         try:
                             image_url = get_web_image_url(last_user_message, last_user_message, deep_scrape=deep_scrape)
+                            # Pulisci l'URL da newline e spazi
+                            if image_url:
+                                image_url = image_url.strip().replace('\n', '').replace('\r', '').replace(' ', '')
                             # Filtra immagini placeholder o base64 vuote
                             if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
                                 # Crea GameInfo minimale solo con immagine per il frontend
@@ -231,6 +234,9 @@ async def chat_endpoint(payload: ChatRequest):
                         # È un personaggio - crea GameInfo con immagine se disponibile
                         try:
                             image_url = get_web_image_url(last_user_message, last_user_message)
+                            # Pulisci l'URL da newline e spazi
+                            if image_url:
+                                image_url = image_url.strip().replace('\n', '').replace('\r', '').replace(' ', '')
                             if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
                                 game_info = GameInfo(
                                     title=entity_name.title(),
