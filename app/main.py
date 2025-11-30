@@ -126,15 +126,26 @@ async def chat_endpoint(payload: ChatRequest):
             if is_character_query:
                 # Per personaggi, vai direttamente a web (non cercare nel database giochi)
                 logger.info(f"Character query detected, searching web for: {last_user_message}")
+                
+                # Rileva se l'utente chiede approfondimenti
+                deep_scrape_keywords = [
+                    "approfondisci", "dimmi di più", "altre info", "altre informazioni",
+                    "dimmi altro", "raccontami di più", "espandi", "più dettagli",
+                    "più informazioni", "altro su", "altro riguardo"
+                ]
+                deep_scrape = any(keyword in last_user_message.lower() for keyword in deep_scrape_keywords)
+                if deep_scrape:
+                    logger.info("Richiesta di approfondimento rilevata, estraggo tutto il contenuto")
+                
                 game_info = None  # Inizializza prima del try
                 try:
                     # Passa l'intera query come additional_query per mantenere il contesto (es. "in ace attorney")
-                    web_context = get_web_context(last_user_message, last_user_message)
+                    web_context = get_web_context(last_user_message, last_user_message, deep_scrape=deep_scrape)
                     if web_context:
                         context = web_context
                         # Crea GameInfo SOLO se c'è un'immagine da mostrare
                         try:
-                            image_url = get_web_image_url(last_user_message, last_user_message)
+                            image_url = get_web_image_url(last_user_message, last_user_message, deep_scrape=deep_scrape)
                             # Filtra immagini placeholder o base64 vuote
                             if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
                                 # Crea GameInfo minimale solo con immagine per il frontend
@@ -152,6 +163,8 @@ async def chat_endpoint(payload: ChatRequest):
                                     image_url=image_url
                                 )
                                 logger.info(f"Created GameInfo with image for character: {entity_name}")
+                                logger.info(f"GameInfo image_url value: {game_info.image_url}")
+                                logger.info(f"GameInfo JSON serialized: {game_info.model_dump()}")
                         except Exception as img_error:
                             logger.warning(f"Error getting image URL: {img_error}")
                             game_info = None
@@ -164,7 +177,18 @@ async def chat_endpoint(payload: ChatRequest):
             else:
                 # Per giochi, prova prima Fandom (più accurato), poi database locale
                 logger.info(f"Game query detected, trying Fandom first for: {last_user_message}")
-                web_context = get_web_context(last_user_message, "")
+                
+                # Rileva se l'utente chiede approfondimenti
+                deep_scrape_keywords = [
+                    "approfondisci", "dimmi di più", "altre info", "altre informazioni",
+                    "dimmi altro", "raccontami di più", "espandi", "più dettagli",
+                    "più informazioni", "altro su", "altro riguardo"
+                ]
+                deep_scrape = any(keyword in last_user_message.lower() for keyword in deep_scrape_keywords)
+                if deep_scrape:
+                    logger.info("Richiesta di approfondimento rilevata, estraggo tutto il contenuto")
+                
+                web_context = get_web_context(last_user_message, "", deep_scrape=deep_scrape)
                 
                 if web_context:
                     # Fandom ha trovato informazioni - usale come fonte principale

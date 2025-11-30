@@ -539,7 +539,7 @@ def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[st
     
     return None
 
-def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) -> Optional[tuple]:
+def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False, deep_scrape: bool = False) -> Optional[tuple]:
     """
     Fa scraping di una pagina Fandom e estrae il contenuto principale e la prima immagine.
     Prova diverse varianti del nome se la prima non funziona.
@@ -548,6 +548,7 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
         fandom_name: Nome del fandom (es. "aceattorney", "zelda")
         page_name: Nome della pagina (personaggio o gioco già formattato)
         is_game: Se True, è un gioco (usa formattazione diversa)
+        deep_scrape: Se True, estrae tutto il contenuto. Se False, limita a 15 paragrafi e 5 liste
     
     Returns:
         Tuple (content: str, image_url: Optional[str]) o None se non trovato
@@ -743,54 +744,74 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
                     for ref in main_content.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
                         ref.decompose()
                     
-                    # Estrai TUTTO il contenuto della pagina (paragrafi, liste, sezioni)
+                    # Estrai contenuto della pagina (limitato o completo in base a deep_scrape)
                     content_text = ""
                     
-                    # Estrai tutti i paragrafi (senza limite)
-                    paragraphs = main_content.find_all('p')
-                    for p in paragraphs:
-                        # Rimuovi note e riferimenti dai paragrafi
-                        for ref in p.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
-                            ref.decompose()
+                    if deep_scrape:
+                        # Estrai TUTTO il contenuto (per approfondimenti)
+                        paragraphs = main_content.find_all('p')
+                        for p in paragraphs:
+                            # Rimuovi note e riferimenti dai paragrafi
+                            for ref in p.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
+                                ref.decompose()
+                            
+                            text = p.get_text(separator=' ', strip=True)
+                            # Filtra solo paragrafi troppo corti o non significativi
+                            if len(text) > 50 and not re.match(r'^[\d\s\[\]()]+$', text):
+                                content_text += text + " "
                         
-                        text = p.get_text(separator=' ', strip=True)
-                        # Filtra solo paragrafi troppo corti o non significativi
-                        if len(text) > 50 and not re.match(r'^[\d\s\[\]()]+$', text):  # Evita paragrafi solo numeri/simboli
-                            content_text += text + " "
-                    
-                    # Estrai tutte le liste significative
-                    lists = main_content.find_all(['ul', 'ol'])
-                    for ul in lists:
-                        # Evita liste di navigazione o riferimenti
-                        if not ul.find_parent(['nav', 'aside', 'div'], class_=re.compile(r'nav|sidebar|reference')):
-                            list_text = ul.get_text(separator=' ', strip=True)
-                            if len(list_text) > 30:
-                                content_text += list_text + " "
-                    
-                    # Estrai anche i contenuti delle sezioni (h2, h3 con contenuto)
-                    sections = main_content.find_all(['h2', 'h3'])
-                    for section in sections:
-                        section_title = section.get_text(strip=True)
-                        # Prendi il contenuto dopo l'header fino al prossimo header
-                        next_sibling = section.find_next_sibling()
-                        if next_sibling and section_title:
-                            # Aggiungi il titolo della sezione
-                            content_text += f"{section_title}. "
-                            # Aggiungi il contenuto della sezione (primi 500 caratteri per evitare troppo testo)
-                            section_content = ""
-                            current = next_sibling
-                            count = 0
-                            while current and count < 10:  # Limita a 10 elementi per sezione
-                                if current.name in ['h2', 'h3']:
-                                    break
-                                if current.name in ['p', 'ul', 'ol']:
-                                    text = current.get_text(separator=' ', strip=True)
-                                    if len(text) > 30:
-                                        section_content += text + " "
-                                current = current.find_next_sibling()
-                                count += 1
-                            if section_content:
-                                content_text += section_content[:500] + " "
+                        # Estrai tutte le liste significative
+                        lists = main_content.find_all(['ul', 'ol'])
+                        for ul in lists:
+                            # Evita liste di navigazione o riferimenti
+                            if not ul.find_parent(['nav', 'aside', 'div'], class_=re.compile(r'nav|sidebar|reference')):
+                                list_text = ul.get_text(separator=' ', strip=True)
+                                if len(list_text) > 30:
+                                    content_text += list_text + " "
+                        
+                        # Estrai anche i contenuti delle sezioni (h2, h3 con contenuto)
+                        sections = main_content.find_all(['h2', 'h3'])
+                        for section in sections:
+                            section_title = section.get_text(strip=True)
+                            next_sibling = section.find_next_sibling()
+                            if next_sibling and section_title:
+                                content_text += f"{section_title}. "
+                                section_content = ""
+                                current = next_sibling
+                                count = 0
+                                while current and count < 10:
+                                    if current.name in ['h2', 'h3']:
+                                        break
+                                    if current.name in ['p', 'ul', 'ol']:
+                                        text = current.get_text(separator=' ', strip=True)
+                                        if len(text) > 30:
+                                            section_content += text + " "
+                                    current = current.find_next_sibling()
+                                    count += 1
+                                if section_content:
+                                    content_text += section_content[:500] + " "
+                    else:
+                        # Estrai solo primi 15 paragrafi e 5 liste (default)
+                        paragraphs = main_content.find_all('p', limit=15)
+                        for p in paragraphs:
+                            # Rimuovi note e riferimenti dai paragrafi
+                            for ref in p.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
+                                ref.decompose()
+                            
+                            text = p.get_text(separator=' ', strip=True)
+                            # Filtra paragrafi troppo corti o non significativi
+                            if len(text) > 80 and not re.match(r'^[\d\s\[\]()]+$', text):
+                                content_text += text + " "
+                        
+                        # Se non abbiamo abbastanza contenuto, prendi anche le liste
+                        if len(content_text) < 300:
+                            lists = main_content.find_all(['ul', 'ol'], limit=5)
+                            for ul in lists:
+                                # Evita liste di navigazione o riferimenti
+                                if not ul.find_parent(['nav', 'aside', 'div'], class_=re.compile(r'nav|sidebar|reference')):
+                                    list_text = ul.get_text(separator=' ', strip=True)
+                                    if len(list_text) > 50:
+                                        content_text += list_text + " "
                     
                     # Pulisci il testo finale in modo più accurato
                     content_text = re.sub(r'\[\d+\]', '', content_text)  # Rimuovi riferimenti numerici [1], [2], ecc.
@@ -813,12 +834,13 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
                     if content_text and not content_text.endswith('.'):
                         content_text += '.'
                     
-                    # Restituisci TUTTO il contenuto (l'AI sintetizzerà)
+                    # Restituisci il contenuto estratto
                     if len(content_text) > 100:
-                        logger.info(f"✅ Contenuto completo estratto: {len(content_text)} caratteri")
+                        scrape_type = "completo" if deep_scrape else "limitato"
+                        logger.info(f"✅ Contenuto {scrape_type} estratto: {len(content_text)} caratteri")
                         if image_url:
                             logger.info(f"✅ Immagine trovata: {image_url}")
-                        return (content_text, image_url)  # Restituisce tutto il contenuto, l'AI sintetizzerà
+                        return (content_text, image_url)
                 else:
                     logger.warning(f"Contenuto Fandom troppo corto: {len(content_text)} caratteri")
                     # Prova la prossima variante
@@ -842,7 +864,7 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
     logger.warning(f"Nessuna variante del nome ha funzionato per {page_name} su {fandom_name}.fandom.com")
     return None
 
-def search_web_game_info(game_title: str, query: str = "") -> tuple:
+def search_web_game_info(game_title: str, query: str = "", deep_scrape: bool = False) -> tuple:
     """
     Cerca informazioni su un gioco/personaggio Nintendo su internet.
     Prima prova Fandom, poi fallback su DuckDuckGo/Google.
@@ -860,7 +882,7 @@ def search_web_game_info(game_title: str, query: str = "") -> tuple:
             fandom_name, character_name = fandom_info
             logger.info(f"Rilevata serie Fandom: {fandom_name} per personaggio: {character_name}")
             
-            fandom_result = scrape_fandom_page(fandom_name, character_name, is_game=False)
+            fandom_result = scrape_fandom_page(fandom_name, character_name, is_game=False, deep_scrape=deep_scrape)
             if fandom_result:
                 fandom_content, image_url = fandom_result
                 logger.info(f"✅ Informazioni trovate su Fandom per {character_name}")
@@ -872,7 +894,7 @@ def search_web_game_info(game_title: str, query: str = "") -> tuple:
             fandom_name, formatted_game_name = fandom_game_info
             logger.info(f"Rilevato gioco Fandom: {fandom_name} - {formatted_game_name}")
             
-            fandom_result = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True)
+            fandom_result = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True, deep_scrape=deep_scrape)
             if fandom_result:
                 fandom_content, image_url = fandom_result
                 logger.info(f"✅ Informazioni trovate su Fandom per gioco: {formatted_game_name}")
@@ -960,12 +982,17 @@ def search_web_game_info(game_title: str, query: str = "") -> tuple:
         logger.warning(f"Errore nella ricerca web per {game_title}: {str(e)}")
         return (None, None)
 
-def get_web_context(game_title: str, additional_query: str = "") -> Optional[str]:
+def get_web_context(game_title: str, additional_query: str = "", deep_scrape: bool = False) -> Optional[str]:
     """
     Ottiene contesto da web per un gioco quando non disponibile localmente.
     Restituisce una stringa formattata con informazioni trovate.
+    
+    Args:
+        game_title: Nome del gioco/personaggio
+        additional_query: Query aggiuntiva per contesto
+        deep_scrape: Se True, estrae tutto il contenuto. Se False, limita a 15 paragrafi e 5 liste
     """
-    web_info, _ = search_web_game_info(game_title, additional_query)  # Ignora immagine nel contesto
+    web_info, _ = search_web_game_info(game_title, additional_query, deep_scrape=deep_scrape)  # Ignora immagine nel contesto
     
     if web_info:
         return f"""
@@ -978,11 +1005,11 @@ Usa queste informazioni con cautela e menziona all'utente che sono informazioni 
 """
     return None
 
-def get_web_image_url(game_title: str, query: str = "") -> Optional[str]:
+def get_web_image_url(game_title: str, query: str = "", deep_scrape: bool = False) -> Optional[str]:
     """
     Ottiene l'URL dell'immagine da Fandom per un personaggio/gioco.
     """
-    _, image_url = search_web_game_info(game_title, query)
+    _, image_url = search_web_game_info(game_title, query, deep_scrape=deep_scrape)
     return image_url
 
 def extract_entity_name(query: str) -> str:
