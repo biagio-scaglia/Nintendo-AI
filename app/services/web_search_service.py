@@ -1016,6 +1016,9 @@ def get_web_image_url(game_title: str, query: str = "", deep_scrape: bool = Fals
     Ottiene l'URL dell'immagine da Fandom per un personaggio/gioco.
     """
     _, image_url = search_web_game_info(game_title, query, deep_scrape=deep_scrape)
+    # Pulisci l'URL da newline e spazi
+    if image_url:
+        image_url = image_url.strip().replace('\n', '').replace('\r', '').replace(' ', '')
     return image_url
 
 def extract_entity_name(query: str) -> str:

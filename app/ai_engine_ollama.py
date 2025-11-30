@@ -10,9 +10,12 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL_NAME = "qwen3:8b"  # Modello preferito, verrà auto-rilevato se disponibile
 
 def clean_markdown(text: str) -> str:
-    """Rimuove formattazione markdown dalla risposta per un output più pulito"""
+    """Rimuove TUTTA la formattazione markdown dalla risposta per un output più pulito"""
     if not text:
         return text
+    
+    # Rimuovi headers markdown (#, ##, ###, ecc.) - IMPORTANTE: rimuovi anche il testo dopo
+    text = re.sub(r'^#{1,6}\s+(.+)$', r'\1', text, flags=re.MULTILINE)
     
     # Rimuovi bold (**text** o __text__)
     text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
@@ -22,17 +25,34 @@ def clean_markdown(text: str) -> str:
     text = re.sub(r'(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)', r'\1', text)
     text = re.sub(r'(?<!_)_(?!_)(.*?)(?<!_)_(?!_)', r'\1', text)
     
+    # Rimuovi strikethrough (~~text~~)
+    text = re.sub(r'~~(.*?)~~', r'\1', text)
+    
     # Rimuovi code blocks (```code```)
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     
     # Rimuovi inline code (`code`)
     text = re.sub(r'`([^`]+)`', r'\1', text)
     
-    # Rimuovi link markdown [text](url)
+    # Rimuovi link markdown [text](url) - mantieni solo il testo
     text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
     
-    # Pulisci spazi multipli
-    text = re.sub(r'\s+', ' ', text)
+    # Rimuovi immagini markdown ![alt](url)
+    text = re.sub(r'!\[([^\]]*)\]\([^\)]+\)', '', text)
+    
+    # Rimuovi liste markdown (mantieni il contenuto, rimuovi solo i marker)
+    text = re.sub(r'^[\*\-\+]\s+', '', text, flags=re.MULTILINE)  # Liste con *, -, +
+    text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE)  # Liste numerate
+    
+    # Rimuovi blockquotes (> text)
+    text = re.sub(r'^>\s+', '', text, flags=re.MULTILINE)
+    
+    # Rimuovi linee orizzontali (---, ***)
+    text = re.sub(r'^[\-\*]{3,}$', '', text, flags=re.MULTILINE)
+    
+    # Pulisci spazi multipli e newline eccessive (mantieni max 2 newline consecutive)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = re.sub(r'[ \t]+', ' ', text)
     text = text.strip()
     
     return text
@@ -134,17 +154,24 @@ STILE E TONO
 
 - Entusiasta e appassionato come un vero fan Nintendo
 - Colloquiale ma informativo e dettagliato
-- USA EMOJI nelle risposte: aggiungi emoji appropriate per rendere le risposte più vivaci (🎮, ⭐, 💫, 🎯, ✨, 🎭, 🗡️, 🍄, ⚡, 👾, ecc.)
-- Le emoji rendono le risposte più coinvolgenti e piacevoli da leggere
-- Struttura le risposte con paragrafi chiari e coinvolgenti
+
+🎨 FORMATTAZIONE E STILE:
+- ⛔ NON USARE MAI markdown: niente #, ###, **, __, o altri caratteri di formattazione markdown
+- ✅ USA SOLO testo normale con emoji per abbellire e strutturare
+- 🎯 USA EMOJI generosamente: aggiungi emoji appropriate per rendere le risposte vivaci e piacevoli
+- 📝 Esempi di emoji da usare: 🎮 ⭐ 💫 🎯 ✨ 🎭 🗡️ 🍄 ⚡ 👾 🏰 👑 🎪 🌟 💎 🔥 💚 🔵 🟢 🟡 🔴 🎨 🎬 🎵 🎸 🎺 🥁 🎤 🎧 🎨 🎯 🎲 🎰 🎪 🎭 🎬 🎨 🎯
+- 📋 Per le sezioni usa emoji all'inizio: 🎮 per giochi, 👤 per personaggi, 📖 per storie, ⚔️ per gameplay, 💡 per curiosità
+- 📝 Struttura le risposte con paragrafi chiari separati da righe vuote
+- 📌 Per gli elenchi usa emoji come bullet points: • oppure emoji tematiche (🎯, ⭐, 💫)
+- 🎨 Rendi le risposte visivamente accattivanti con emoji strategiche
+
+📝 CONTENUTO:
 - Quando consigli un gioco, spiega COSA lo rende speciale e PERCHÉ è adatto
 - Non essere generico: sii specifico su gameplay, meccaniche, esperienza
 - Mostra entusiasmo genuino per i giochi che consigli
 - Le risposte devono essere MINIMO 3-4 frasi, meglio se più dettagliate
 - IMPORTANTE: Completa sempre le frasi e i pensieri - NON tagliare le risposte a metà frase!
 - Se stai spiegando qualcosa, finisci sempre la spiegazione in modo completo
-- Formatta le risposte con paragrafi chiari e ben strutturati
-- Usa elenchi puntati quando appropriato per migliorare la leggibilità
 - IMPORTANTE: NON tagliare mai le risposte a metà frase o parola
 - Completa sempre ogni pensiero in modo completo prima di terminare
 - Se stai scrivendo una lista, completa tutti gli elementi
