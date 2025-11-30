@@ -5,6 +5,7 @@ from app.ai_engine_ollama import chat_nintendo_ai
 from app.utils import validate_history, format_for_engine, classify_intent
 from app.services.recommender_service import load_games, filter_by_platform, smart_recommend, get_similar_games
 from app.services.info_service import get_game_info, search_game_info, get_context_for_ai
+from app.services.web_search_service import get_web_context
 import uvicorn
 import logging
 import re
@@ -44,6 +45,37 @@ def extract_tags_from_response(response: str) -> list:
     
     return list(set(found_tags))[:5]
 
+def extract_mood_from_text(text: str) -> list:
+    """Estrae mood e tags dall'input dell'utente per la raccomandazione"""
+    text_lower = text.lower()
+    mood_keywords = {
+        # Mood positivi
+        "felice": ["felice", "happy", "contento", "gioioso", "allegro", "euforico"],
+        "energico": ["energico", "energetic", "attivo", "vivace", "dinamico"],
+        "stanco": ["stanco", "tired", "affaticato", "spossato", "esausto"],
+        "rilassante": ["rilassante", "relax", "tranquillo", "calm", "pacifico", "sereno"],
+        "avventuroso": ["avventura", "adventure", "esplorare", "explore", "scoprire"],
+        "competitivo": ["competitivo", "competitive", "sfida", "challenge", "gara"],
+        "sociale": ["sociale", "social", "amici", "friends", "multiplayer", "insieme"],
+        "nostalgico": ["nostalgico", "nostalgic", "retro", "classico", "vintage"],
+        "emotivo": ["emotivo", "emotional", "sentimentale", "storia", "story"],
+        "epico": ["epico", "epic", "grandioso", "imponente", "spettacolare"],
+        # Mood negativi/neutri
+        "triste": ["triste", "sad", "depresso", "giù", "down"],
+        "stressato": ["stressato", "stressed", "ansioso", "nervoso", "preoccupato"],
+        "annoiato": ["annoiato", "bored", "noioso", "tedioso"]
+    }
+    
+    found_moods = []
+    for mood, keywords in mood_keywords.items():
+        if any(kw in text_lower for kw in keywords):
+            found_moods.append(mood)
+    
+    # Estrai anche tags generici
+    tags = extract_tags_from_response(text)
+    
+    return found_moods + tags
+
 @app.get("/")
 async def root():
     return {
@@ -78,7 +110,10 @@ async def chat_endpoint(payload: ChatRequest):
         
         context = ""
         game_info = None
+        recommended_game = None
+        all_text = " ".join([m.get("content", "") for m in validated])
         
+        # Se è una richiesta di informazioni, cerca il gioco specifico
         if intent == "info_request":
             context = get_context_for_ai(last_user_message)
             if context:
@@ -89,15 +124,90 @@ async def chat_endpoint(payload: ChatRequest):
                         game_info = GameInfo(**game_info_data)
                     except:
                         pass
+            else:
+                # Se non trovato localmente, prova ricerca web
+                # Estrai il nome del gioco dalla query
+                web_context = get_web_context(last_user_message, "")
+                if web_context:
+                    context = web_context
+        
+        # Se è una richiesta di raccomandazione, trova il gioco PRIMA di generare la risposta
+        elif intent == "recommendation_request":
+            # Estrai mood e tags dall'input dell'utente
+            user_mood_tags = extract_mood_from_text(all_text)
+            games = load_games()
+            recommended = smart_recommend(games, user_mood_tags, user_text=all_text)
+            
+            if recommended:
+                recommended_game = Game(
+                    title=recommended.get("title", ""),
+                    platform=recommended.get("platform", ""),
+                    tags=recommended.get("tags", []),
+                    mood=recommended.get("mood", [])
+                )
+                
+                # Ottieni informazioni dettagliate sul gioco raccomandato
+                game_details = get_game_info(recommended.get("title", ""))
+                if game_details:
+                    context = f"""🎮 GIOCO RACCOMANDATO PER L'UTENTE: {recommended.get('title', '')}
+
+Piattaforma: {recommended.get('platform', '')}
+Tags: {', '.join(recommended.get('tags', []))}
+Mood: {', '.join(recommended.get('mood', []))}
+
+DESCRIZIONE:
+{game_details.get('description', '')}
+
+GAMEPLAY:
+{game_details.get('gameplay', '')}
+
+Difficoltà: {game_details.get('difficulty', 'N/A')}
+Modalità: {', '.join(game_details.get('modes', []))}
+
+⚠️ ISTRUZIONI CRITICHE:
+- DEVI menzionare "{recommended.get('title', '')}" nella tua risposta
+- Spiega PERCHÉ questo gioco è perfetto per l'utente basandoti sul suo umore: {', '.join(user_mood_tags) if user_mood_tags else 'generale'}
+- Sii entusiasta, specifico e coinvolgente
+- Usa le informazioni sopra per dare dettagli concreti sul gameplay
+- Non essere vago o generico!
+- Se l'utente non ha specificato la console, chiedigliela per essere più preciso"""
+                else:
+                    # Se non trovato localmente, prova ricerca web
+                    web_info = get_web_context(recommended.get('title', ''), "")
+                    if web_info:
+                        context = f"""🎮 GIOCO RACCOMANDATO PER L'UTENTE: {recommended.get('title', '')}
+
+Piattaforma: {recommended.get('platform', '')}
+Tags: {', '.join(recommended.get('tags', []))}
+Mood: {', '.join(recommended.get('mood', []))}
+
+{web_info}
+
+⚠️ ISTRUZIONI CRITICHE:
+- DEVI menzionare "{recommended.get('title', '')}" nella tua risposta
+- Spiega PERCHÉ questo gioco è perfetto per l'utente basandoti sul suo umore: {', '.join(user_mood_tags) if user_mood_tags else 'generale'}
+- Usa le informazioni web sopra se rilevanti
+- Sii entusiasta, specifico e coinvolgente
+- Se l'utente non ha specificato la console, chiedigliela per essere più preciso"""
+                    else:
+                        context = f"""🎮 GIOCO RACCOMANDATO PER L'UTENTE: {recommended.get('title', '')}
+
+Piattaforma: {recommended.get('platform', '')}
+Tags: {', '.join(recommended.get('tags', []))}
+Mood: {', '.join(recommended.get('mood', []))}
+
+⚠️ ISTRUZIONI CRITICHE:
+- DEVI menzionare "{recommended.get('title', '')}" nella tua risposta
+- Spiega PERCHÉ questo gioco è perfetto per l'utente basandoti sul suo umore: {', '.join(user_mood_tags) if user_mood_tags else 'generale'}
+- Sii entusiasta, specifico e coinvolgente
+- Se l'utente non ha specificato la console, chiedigliela per essere più preciso"""
         
         formatted = format_for_engine(validated)
         reply = chat_nintendo_ai(formatted, context=context)
         
-        tags = extract_tags_from_response(reply)
-        all_text = " ".join([m.get("content", "") for m in validated])
-        
-        recommended_game = None
-        if intent == "recommendation_request" or not game_info:
+        # Se non abbiamo ancora trovato un gioco raccomandato, proviamo dopo
+        if not recommended_game and not game_info:
+            tags = extract_tags_from_response(reply)
             games = load_games()
             recommended = smart_recommend(games, tags, user_text=all_text)
             

@@ -59,12 +59,23 @@ def match_by_tags(games: List[Dict], tags: List[str]) -> Optional[Dict]:
                     score += sim
             
             for game_mood in game_moods:
-                if user_tag_lower == game_mood:
+                # Supporta formato bilingue "english/italiano"
+                mood_parts = game_mood.split("/")
+                mood_english = mood_parts[0].lower() if mood_parts else ""
+                mood_italian = mood_parts[1].lower() if len(mood_parts) > 1 else ""
+                
+                if user_tag_lower == mood_english or user_tag_lower == mood_italian:
                     score += 1.5
+                elif user_tag_lower in mood_english or mood_english in user_tag_lower:
+                    score += 1.0
+                elif mood_italian and (user_tag_lower in mood_italian or mood_italian in user_tag_lower):
+                    score += 1.0
                 elif user_tag_lower in game_mood or game_mood in user_tag_lower:
                     score += 1.0
                 else:
-                    sim = similarity_score(user_tag_lower, game_mood)
+                    sim = similarity_score(user_tag_lower, mood_english)
+                    if mood_italian:
+                        sim = max(sim, similarity_score(user_tag_lower, mood_italian))
                     score += sim * 0.5
         
         if score > best_score:
