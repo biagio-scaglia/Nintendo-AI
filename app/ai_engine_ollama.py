@@ -118,12 +118,14 @@ Quando ricevi informazioni nel contesto:
 - Se manca qualcosa, dillo chiaramente all'utente
 - Non aggiungere dettagli che non sono presenti
 - Riformula in modo naturale e coinvolgente
+- ⚠️ IMPORTANTE: Se le informazioni web sembrano errate o confuse (es. Mipha descritta come cavallo invece che principessa Zora), usa la tua conoscenza corretta e ignora le informazioni errate. Le ricerche web possono essere imprecise.
 
 Quando NON hai informazioni nel contesto:
 - Fai domande mirate per capire meglio le preferenze
 - Usa la tua conoscenza generale Nintendo (solo se sicuro e pertinente)
 - Se possibile, cerca informazioni aggiuntive (il sistema può cercare su internet)
 - Sii proattivo: non aspettare che l'utente dia tutte le informazioni, chiedile tu!
+- ⚠️ IMPORTANTE: Se conosci informazioni corrette su personaggi/giochi Nintendo, usa quelle anche se contraddicono le ricerche web. La tua conoscenza è prioritaria.
 
 ═══════════════════════════════════════════════════════════════
 STILE E TONO
@@ -201,19 +203,37 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
                 "options": {
                     "temperature": 0.8,
                     "top_p": 0.9,
-                    "num_predict": 600,  # Aumentato per risposte complete e non tagliate
-                    "repeat_penalty": 1.1
+                    "num_predict": 800,  # Aumentato per risposte complete e non tagliate
+                    "repeat_penalty": 1.1,
+                    "stop": []  # Rimuovi stop tokens per permettere risposte più lunghe
                 }
             },
-            timeout=60  # Timeout ottimizzato
+            timeout=90  # Timeout aumentato per permettere ricerche web + generazione AI
         )
         
         if response.status_code == 200:
             result = response.json()
             reply = result.get("response", "").strip()
             
+            # Verifica che la risposta non sia stata troncata (controlla se finisce a metà frase)
+            if reply and not reply.endswith(('.', '!', '?', '。', '！', '？')):
+                # Se la risposta finisce a metà, potrebbe essere stata troncata
+                # Prova a completare o almeno avvisa
+                if len(reply) > 500 and not any(punct in reply[-50:] for punct in ['.', '!', '?', '。', '！', '？']):
+                    logger.warning(f"Response might be truncated, length: {len(reply)}")
+            
+            # Log per debug - verifica lunghezza risposta
+            logger.info(f"Response length from Ollama: {len(reply)} characters")
+            
             # Rimuovi markdown per output più pulito
-            return clean_markdown(reply)
+            cleaned = clean_markdown(reply)
+            
+            # Assicurati che la risposta non sia vuota dopo la pulizia
+            if not cleaned and reply:
+                return reply  # Se la pulizia ha rimosso tutto, restituisci l'originale
+            
+            logger.info(f"Cleaned response length: {len(cleaned)} characters")
+            return cleaned
         else:
             return "Errore nella comunicazione con Ollama."
     

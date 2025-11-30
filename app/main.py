@@ -121,17 +121,21 @@ async def chat_endpoint(payload: ChatRequest):
             if is_character_query:
                 # Per personaggi, vai direttamente a web (non cercare nel database giochi)
                 logger.info(f"Character query detected, searching web for: {last_user_message}")
-                web_context = get_web_context(last_user_message, "")
-                if web_context:
-                    context = web_context
-                    # Crea GameInfo strutturato anche da web per il frontend
-                    web_game_info = get_web_game_info(last_user_message, "")
-                    if web_game_info:
-                        try:
-                            game_info = GameInfo(**web_game_info)
-                            logger.info(f"Created GameInfo from web for character query")
-                        except Exception as e:
-                            logger.warning(f"Failed to create GameInfo from web: {e}")
+                try:
+                    web_context = get_web_context(last_user_message, "")
+                    if web_context:
+                        context = web_context
+                        # Crea GameInfo strutturato anche da web per il frontend
+                        web_game_info = get_web_game_info(last_user_message, "")
+                        if web_game_info:
+                            try:
+                                game_info = GameInfo(**web_game_info)
+                                logger.info(f"Created GameInfo from web for character query")
+                            except Exception as e:
+                                logger.warning(f"Failed to create GameInfo from web: {e}")
+                except Exception as e:
+                    logger.warning(f"Web search failed for character query: {e}")
+                    # Continua senza info web, l'AI userà la sua conoscenza
             else:
                 # Per giochi, cerca prima nel database locale
                 context = get_context_for_ai(last_user_message)

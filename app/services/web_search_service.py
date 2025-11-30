@@ -13,11 +13,27 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
     Restituisce una stringa con informazioni trovate o None.
     """
     try:
-        # Costruisci query di ricerca - includi info generali (uscita, piattaforma)
-        base_query = f"{game_title} Nintendo"
+        # Costruisci query di ricerca più specifica
+        # Per personaggi, aggiungi contesto Zelda/Mario/Pokemon se rilevante
+        base_query = game_title.strip()
+        
+        # Rileva se è un personaggio di Zelda
+        zelda_chars = ["zelda", "link", "ganon", "ganondorf", "mipha", "urbosa", "revali", "daruk", "sidon", "impa", "paya", "riju", "yunobo", "tulin"]
+        mario_chars = ["mario", "luigi", "peach", "daisy", "rosalina", "yoshi", "wario", "waluigi", "toad", "bowser", "koopa"]
+        pokemon_chars = ["pikachu", "charizard", "mewtwo", "ash", "misty", "brock"]
+        
+        if any(char in base_query.lower() for char in zelda_chars):
+            base_query = f"{base_query} Zelda character Nintendo"
+        elif any(char in base_query.lower() for char in mario_chars):
+            base_query = f"{base_query} Mario character Nintendo"
+        elif any(char in base_query.lower() for char in pokemon_chars):
+            base_query = f"{base_query} Pokemon character Nintendo"
+        else:
+            base_query = f"{base_query} Nintendo"
+        
         if not query:
             # Aggiungi termini per info generali (data uscita, piattaforma, sviluppatore)
-            search_query = f"{base_query} release date platform developer"
+            search_query = f"{base_query} character game"
         else:
             search_query = f"{base_query} {query}"
         
@@ -30,7 +46,7 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
             'skip_disambig': '1'
         }
         
-        response = requests.get(api_url, params=params, timeout=8)
+        response = requests.get(api_url, params=params, timeout=6)  # Timeout ridotto per non bloccare troppo
         
         if response.status_code == 200:
             data = response.json()
@@ -38,16 +54,23 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
             # Prova a estrarre AbstractText
             if data.get('AbstractText'):
                 abstract = data.get('AbstractText', '')
-                if any(keyword in abstract.lower() for keyword in ['nintendo', 'switch', 'wii', '3ds', 'game']):
-                    return abstract[:500]
+                # Verifica che contenga keyword rilevanti
+                abstract_lower = abstract.lower()
+                if any(keyword in abstract_lower for keyword in ['nintendo', 'switch', 'wii', '3ds', 'game', 'zelda', 'mario', 'pokemon', 'character', 'princess', 'principessa']):
+                    # Filtra informazioni chiaramente errate (es. confusione con altri personaggi)
+                    if len(abstract) > 50:  # Evita snippet troppo corti
+                        return abstract[:500]
             
             # Se non c'è AbstractText, prova con RelatedTopics
             if data.get('RelatedTopics'):
-                for topic in data.get('RelatedTopics', [])[:2]:
+                for topic in data.get('RelatedTopics', [])[:3]:  # Aumentato a 3 per più opzioni
                     if isinstance(topic, dict) and 'Text' in topic:
                         text = topic.get('Text', '')
-                        if any(keyword in text.lower() for keyword in ['nintendo', 'switch', 'wii', '3ds', 'game']):
-                            return text[:500]
+                        text_lower = text.lower()
+                        # Verifica che sia rilevante e non confuso
+                        if any(keyword in text_lower for keyword in ['nintendo', 'switch', 'wii', '3ds', 'game', 'zelda', 'mario', 'pokemon', 'character']):
+                            if len(text) > 50:  # Evita snippet troppo corti
+                                return text[:500]
         
         # Fallback: ricerca Google (semplice, senza API key)
         # Nota: questo è un fallback base, potrebbe non funzionare sempre
@@ -57,16 +80,20 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
             params = {'q': search_query}
-            response = requests.get(google_url, params=params, headers=headers, timeout=8)
+            response = requests.get(google_url, params=params, headers=headers, timeout=6)  # Timeout ridotto per non bloccare troppo
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
-                # Cerca snippet nei risultati
-                snippets = soup.find_all('span', class_='aCOpRe')
-                for snippet in snippets[:2]:
+                # Cerca snippet nei risultati Google (pattern aggiornati)
+                # Prova diversi selettori per i snippet
+                snippets = soup.find_all('span', class_='aCOpRe') or soup.find_all('div', class_='VwiC3b') or soup.find_all('span', class_='st')
+                for snippet in snippets[:3]:  # Aumentato a 3 risultati
                     text = snippet.get_text(strip=True)
                     if text and len(text) > 50:
-                        return text[:500]
+                        text_lower = text.lower()
+                        # Verifica che sia rilevante
+                        if any(keyword in text_lower for keyword in ['nintendo', 'zelda', 'mario', 'pokemon', 'character', 'game', 'princess', 'principessa']):
+                            return text[:500]
         except:
             pass  # Ignora errori nel fallback
         
