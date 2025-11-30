@@ -8,8 +8,10 @@ Sistema intelligente di raccomandazione giochi Nintendo basato su AI, con API RE
 - 💬 **Chat Interattiva**: Interfaccia conversazionale per scoprire giochi Nintendo
 - 📱 **App Flutter**: Applicazione mobile cross-platform (Android/iOS) con visualizzazione strutturata
 - 🔍 **Ricerca Intelligente**: Sistema RAG per informazioni dettagliate sui giochi
-- 🌐 **Integrazione Fandom**: Scraping diretto da wiki Fandom per informazioni accurate su giochi e personaggi
+- 🌐 **Integrazione Fandom**: Scraping completo da wiki Fandom per informazioni accurate su giochi e personaggi
 - 🖼️ **Immagini Personaggi**: Estrazione automatica di immagini da Fandom per personaggi Nintendo
+- 📄 **Scraping Completo**: Estrae tutto il contenuto della pagina Fandom (paragrafi, liste, sezioni) per massima completezza
+- 🧠 **Sintesi AI**: L'AI sintetizza automaticamente tutto il contenuto estratto per risposte complete e accurate
 - ⚡ **Risposte Veloci**: Modalità ottimizzata per messaggi colloquiali (small_talk) con tempi di risposta ridotti
 - 🎯 **42 Giochi Nintendo**: Database completo con tags e mood bilingue (IT/EN)
 - 👤 **Info Personaggi**: Supporto completo per domande su personaggi Nintendo con immagini
@@ -119,9 +121,11 @@ Content-Type: application/json
 3. **Matching Intelligente**: Trova il gioco con la migliore corrispondenza
 4. **Risposta Contestuale**: Se richiesto, recupera informazioni dettagliate dal sistema RAG
 5. **Integrazione Fandom**: Per giochi e personaggi, cerca automaticamente su Fandom per informazioni accurate
-6. **Estrazione Immagini**: Recupera immagini da Fandom per personaggi quando disponibili
-7. **Modalità Ottimizzata**: Usa parametri veloci per messaggi colloquiali (small_talk) per risposte rapide
-8. **Visualizzazione Strutturata**: Le informazioni vengono mostrate in card colorate nel frontend con immagini
+6. **Scraping Completo**: Estrae tutto il contenuto della pagina (paragrafi, liste, sezioni) per massima completezza
+7. **Sintesi AI**: L'AI sintetizza automaticamente tutto il contenuto estratto per generare risposte complete
+8. **Estrazione Immagini**: Recupera immagini da Fandom per personaggi quando disponibili
+9. **Modalità Ottimizzata**: Usa parametri veloci per messaggi colloquiali (small_talk) per risposte rapide
+10. **Visualizzazione Strutturata**: Le informazioni vengono mostrate in card colorate nel frontend con immagini
 
 ## 🗄️ Database Giochi
 
@@ -241,8 +245,11 @@ Il sistema include scraping diretto da wiki Fandom per informazioni accurate e a
 
 ### Funzionalità
 
-- ✅ **Scraping Intelligente**: Estrae contenuto principale dalle pagine Fandom, rimuovendo elementi non necessari
+- ✅ **Scraping Completo**: Estrae tutto il contenuto della pagina Fandom (tutti i paragrafi, liste, sezioni) per massima completezza
+- ✅ **Sintesi AI**: L'AI sintetizza automaticamente tutto il contenuto estratto per generare risposte complete e accurate
 - ✅ **Estrazione Immagini**: Recupera automaticamente la prima immagine significativa del personaggio/gioco
+- ✅ **Normalizzazione Nomi**: Gestisce automaticamente varianti comuni (es. "luigi mansion" → "Luigi's Mansion")
+- ✅ **Varianti URL**: Prova automaticamente diverse varianti di URL per trovare la pagina corretta anche con errori di digitazione
 - ✅ **Rilevamento Automatico**: Riconosce automaticamente la serie dalla query (es. "chi è meta knight?" → Kirby)
 - ✅ **Nomi Composti**: Supporta nomi composti come "Meta Knight", "King Dedede", "Captain Falcon"
 - ✅ **Priorità Personaggi**: Rileva prima i personaggi, poi i giochi per evitare falsi positivi

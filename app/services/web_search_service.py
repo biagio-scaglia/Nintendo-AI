@@ -743,29 +743,54 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
                     for ref in main_content.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
                         ref.decompose()
                     
-                    # Estrai paragrafi principali in ordine (primi 15 per più accuratezza)
-                    paragraphs = main_content.find_all('p', limit=15)
+                    # Estrai TUTTO il contenuto della pagina (paragrafi, liste, sezioni)
                     content_text = ""
                     
+                    # Estrai tutti i paragrafi (senza limite)
+                    paragraphs = main_content.find_all('p')
                     for p in paragraphs:
                         # Rimuovi note e riferimenti dai paragrafi
                         for ref in p.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
                             ref.decompose()
                         
                         text = p.get_text(separator=' ', strip=True)
-                        # Filtra paragrafi troppo corti o non significativi
-                        if len(text) > 80 and not re.match(r'^[\d\s\[\]()]+$', text):  # Evita paragrafi solo numeri/simboli
+                        # Filtra solo paragrafi troppo corti o non significativi
+                        if len(text) > 50 and not re.match(r'^[\d\s\[\]()]+$', text):  # Evita paragrafi solo numeri/simboli
                             content_text += text + " "
                     
-                    # Se non abbiamo abbastanza contenuto dai paragrafi, prendi anche le liste
-                    if len(content_text) < 300:
-                        lists = main_content.find_all(['ul', 'ol'], limit=5)
-                        for ul in lists:
-                            # Evita liste di navigazione o riferimenti
-                            if not ul.find_parent(['nav', 'aside', 'div'], class_=re.compile(r'nav|sidebar|reference')):
-                                list_text = ul.get_text(separator=' ', strip=True)
-                                if len(list_text) > 50:
-                                    content_text += list_text + " "
+                    # Estrai tutte le liste significative
+                    lists = main_content.find_all(['ul', 'ol'])
+                    for ul in lists:
+                        # Evita liste di navigazione o riferimenti
+                        if not ul.find_parent(['nav', 'aside', 'div'], class_=re.compile(r'nav|sidebar|reference')):
+                            list_text = ul.get_text(separator=' ', strip=True)
+                            if len(list_text) > 30:
+                                content_text += list_text + " "
+                    
+                    # Estrai anche i contenuti delle sezioni (h2, h3 con contenuto)
+                    sections = main_content.find_all(['h2', 'h3'])
+                    for section in sections:
+                        section_title = section.get_text(strip=True)
+                        # Prendi il contenuto dopo l'header fino al prossimo header
+                        next_sibling = section.find_next_sibling()
+                        if next_sibling and section_title:
+                            # Aggiungi il titolo della sezione
+                            content_text += f"{section_title}. "
+                            # Aggiungi il contenuto della sezione (primi 500 caratteri per evitare troppo testo)
+                            section_content = ""
+                            current = next_sibling
+                            count = 0
+                            while current and count < 10:  # Limita a 10 elementi per sezione
+                                if current.name in ['h2', 'h3']:
+                                    break
+                                if current.name in ['p', 'ul', 'ol']:
+                                    text = current.get_text(separator=' ', strip=True)
+                                    if len(text) > 30:
+                                        section_content += text + " "
+                                current = current.find_next_sibling()
+                                count += 1
+                            if section_content:
+                                content_text += section_content[:500] + " "
                     
                     # Pulisci il testo finale in modo più accurato
                     content_text = re.sub(r'\[\d+\]', '', content_text)  # Rimuovi riferimenti numerici [1], [2], ecc.
@@ -777,22 +802,23 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
                     content_text = re.sub(r'\.{2,}', '.', content_text)  # Rimuovi punti multipli
                     content_text = content_text.strip()
                     
-                    # Rimuovi frasi incomplete o troppo corte all'inizio/fine
+                    # Rimuovi frasi incomplete o troppo corte
                     sentences = content_text.split('.')
                     cleaned_sentences = []
                     for sentence in sentences:
                         sentence = sentence.strip()
-                        if len(sentence) > 20:  # Solo frasi significative
+                        if len(sentence) > 15:  # Solo frasi significative
                             cleaned_sentences.append(sentence)
                     content_text = '. '.join(cleaned_sentences)
                     if content_text and not content_text.endswith('.'):
                         content_text += '.'
                     
-                    if len(content_text) > 150:
-                        logger.info(f"✅ Contenuto Fandom estratto: {len(content_text)} caratteri")
+                    # Restituisci TUTTO il contenuto (l'AI sintetizzerà)
+                    if len(content_text) > 100:
+                        logger.info(f"✅ Contenuto completo estratto: {len(content_text)} caratteri")
                         if image_url:
                             logger.info(f"✅ Immagine trovata: {image_url}")
-                        return (content_text[:3000], image_url)  # Restituisce tupla (contenuto, image_url)
+                        return (content_text, image_url)  # Restituisce tutto il contenuto, l'AI sintetizzerà
                 else:
                     logger.warning(f"Contenuto Fandom troppo corto: {len(content_text)} caratteri")
                     # Prova la prossima variante
