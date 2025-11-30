@@ -43,6 +43,12 @@ dependencies:
   
   # JSON serialization
   json_annotation: ^4.8.1
+  
+  # Image loading and caching
+  cached_network_image: ^3.3.1
+  
+  # Markdown support
+  flutter_markdown: ^0.6.18
 
 dev_dependencies:
   flutter_test:
