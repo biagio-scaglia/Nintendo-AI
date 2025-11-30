@@ -8,21 +8,131 @@ import urllib.parse
 
 logger = logging.getLogger(__name__)
 
+def normalize_game_name(game_name: str) -> str:
+    """
+    Normalizza il nome del gioco per gestire varianti comuni in modo generico.
+    Gestisce apostrofi mancanti, punteggiatura, "&" vs "and", ecc.
+    Es: "luigi mansion" -> "Luigi's Mansion", "mario and luigi" -> "Mario & Luigi"
+    """
+    game_lower = game_name.lower().strip()
+    
+    # Mappatura specifica per giochi con nomi particolari (solo per casi speciali)
+    specific_mappings = {
+        "luigi mansion": "Luigi's Mansion",
+        "luigis mansion": "Luigi's Mansion",
+        "luigi mansion 3": "Luigi's Mansion 3",
+        "luigis mansion 3": "Luigi's Mansion 3",
+        "luigi mansion dark moon": "Luigi's Mansion: Dark Moon",
+        "luigis mansion dark moon": "Luigi's Mansion: Dark Moon",
+        "luigi mansion 2": "Luigi's Mansion: Dark Moon",
+        "luigis mansion 2": "Luigi's Mansion: Dark Moon",
+        "super mario bros": "Super Mario Bros.",
+        "super mario bros 3": "Super Mario Bros. 3",
+        "the legend of zelda": "The Legend of Zelda",
+        "zelda breath of the wild": "The Legend of Zelda: Breath of the Wild",
+        "zelda tears of the kingdom": "The Legend of Zelda: Tears of the Kingdom",
+        "zelda ocarina of time": "The Legend of Zelda: Ocarina of Time",
+    }
+    
+    # Controlla mappature specifiche
+    if game_lower in specific_mappings:
+        return specific_mappings[game_lower]
+    
+    # Normalizzazione generica
+    words = game_lower.split()
+    normalized_words = []
+    skip_next = False
+    
+    # Nomi propri comuni che possono avere apostrofi
+    proper_names = ["luigi", "mario", "zelda", "link", "yoshi", "wario", "waluigi", "peach", "daisy", "rosalina", "bowser", "toad"]
+    
+    i = 0
+    while i < len(words):
+        if skip_next:
+            skip_next = False
+            i += 1
+            continue
+            
+        word = words[i]
+        
+        # Gestisci "and" -> "&" per nomi come "Mario and Luigi"
+        if word == "and" and i > 0 and i < len(words) - 1:
+            # Controlla se è un caso comune come "mario and luigi"
+            if words[i-1] in proper_names and words[i+1] in proper_names:
+                normalized_words.append("&")
+                i += 1
+                continue
+        
+        # Gestisci apostrofi mancanti: "luigis" -> "Luigi's"
+        # Pattern: nome + "s" (senza apostrofo) -> nome + "'s"
+        found_apostrophe_fix = False
+        for name in proper_names:
+            if word == name + "s":
+                # È un nome con 's' aggiunta senza apostrofo (es. "luigis")
+                normalized_words.append(name.capitalize() + "'s")
+                found_apostrophe_fix = True
+                break
+        
+        if found_apostrophe_fix:
+            i += 1
+            continue
+        
+        # Gestisci pattern "nome s parola" -> "nome's parola" (es. "luigi s mansion")
+        if i > 0 and i < len(words) - 1:
+            prev_word = words[i-1]
+            if word == "s" and prev_word in proper_names:
+                # Pattern trovato: "nome s parola"
+                # Rimuovi l'ultima parola aggiunta (il nome senza apostrofo) e aggiungi con apostrofo
+                if normalized_words and normalized_words[-1].lower() == prev_word:
+                    normalized_words[-1] = prev_word.capitalize() + "'s"
+                else:
+                    normalized_words.append(prev_word.capitalize() + "'s")
+                skip_next = True  # Salta la parola "s"
+                i += 1
+                continue
+        
+        # Capitalizza la prima lettera di ogni parola
+        if word:
+            normalized_words.append(word.capitalize())
+        
+        i += 1
+    
+    result = " ".join(normalized_words)
+    
+    # Gestisci punteggiatura comune
+    result = re.sub(r'\bBros\b', 'Bros.', result, flags=re.IGNORECASE)
+    result = re.sub(r'\bVs\b', 'vs.', result, flags=re.IGNORECASE)
+    
+    # Rimuovi spazi multipli
+    result = re.sub(r'\s+', ' ', result).strip()
+    
+    # Se il risultato è troppo diverso dall'originale o vuoto, usa title case semplice
+    if not result or len(result) < 3:
+        return game_name.strip().title()
+    
+    return result
+
 def format_game_name_for_fandom(game_name: str) -> str:
     """
     Formatta il nome del gioco per l'URL Fandom.
     Es: "Phoenix Wright: Ace Attorney - Trials and Tribulations" -> "Phoenix_Wright:_Ace_Attorney_-_Trials_and_Tribulations"
+    Prima normalizza il nome per gestire varianti comuni.
     """
-    # Sostituisci spazi con underscore, mantieni due punti e trattini
-    formatted = game_name.replace(" ", "_")
+    # Normalizza prima
+    normalized = normalize_game_name(game_name)
+    # Sostituisci spazi con underscore, mantieni due punti, trattini e apostrofi
+    formatted = normalized.replace(" ", "_")
     return formatted
 
 def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, str]]:
     """
     Rileva se è un gioco Nintendo e restituisce (fandom_name, formatted_game_name).
     Es: ("aceattorney", "Phoenix_Wright:_Ace_Attorney_-_Trials_and_Tribulations")
+    Prima normalizza il nome per gestire varianti comuni.
     """
-    game_lower = game_name.lower().strip()
+    # Normalizza il nome del gioco prima di controllare i keyword
+    normalized_game_name = normalize_game_name(game_name)
+    game_lower = normalized_game_name.lower().strip()
     query_lower = query.lower() if query else ""
     combined = f"{game_lower} {query_lower}".lower()
     
@@ -34,10 +144,10 @@ def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, s
     ]
     # Controlla anche se contiene "ace attorney" o "phoenix wright" nel nome
     if "ace attorney" in game_lower or "phoenix wright" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("aceattorney", formatted_name)
     if any(kw in combined for kw in ace_attorney_game_keywords):
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("aceattorney", formatted_name)
     
     # Zelda games
@@ -47,16 +157,18 @@ def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, s
         "skyward sword", "a link to the past", "a link between worlds"
     ]
     if any(kw in combined for kw in zelda_game_keywords):
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("zelda", formatted_name)
     
     # Mario games
     mario_game_keywords = [
         "super mario", "mario kart", "mario party", "mario odyssey",
-        "mario galaxy", "mario sunshine", "paper mario", "mario & luigi"
+        "mario galaxy", "mario sunshine", "paper mario", "mario & luigi",
+        "luigi mansion", "luigis mansion", "luigi's mansion",  # Aggiunto per Luigi's Mansion
+        "mario bros", "mario world", "mario 64", "mario 3d"
     ]
     if any(kw in combined for kw in mario_game_keywords):
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("mario", formatted_name)
     
     # Pokemon games
@@ -66,7 +178,7 @@ def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, s
         "sword", "shield", "scarlet", "violet"
     ]
     if any(kw in combined for kw in pokemon_game_keywords):
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("pokemon", formatted_name)
     
     # Persona e Shin Megami Tensei games
@@ -78,75 +190,75 @@ def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, s
     # Controlla anche se contiene "persona" o "shin megami tensei" o "smt" nel nome
     if ("persona" in game_lower or "shin megami tensei" in game_lower or "megami tensei" in game_lower or 
         ("smt" in game_lower and len(game_lower.split()) <= 3)):  # "smt" da solo o con poche parole
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("megamitensei", formatted_name)
     if any(kw in combined for kw in persona_smt_game_keywords):
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("megamitensei", formatted_name)
     
     # Kirby games
     if "kirby" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("kirby", formatted_name)
     
     # Donkey Kong games
     if "donkey kong" in game_lower or "diddy kong" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("donkeykong", formatted_name)
     
     # Animal Crossing games
     if "animal crossing" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("animalcrossing", formatted_name)
     
     # Star Fox games
     if "star fox" in game_lower or "starfox" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("starfox", formatted_name)
     
     # F-Zero games
     if "f-zero" in game_lower or "fzero" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("fzero", formatted_name)
     
     # Yoshi games
     if "yoshi" in game_lower and "mario" not in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("yoshi", formatted_name)
     
     # Wario games
     if "wario" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("wario", formatted_name)
     
     # Pikmin games
     if "pikmin" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("pikmin", formatted_name)
     
     # Splatoon games
     if "splatoon" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("splatoon", formatted_name)
     
     # Kid Icarus games
     if "kid icarus" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("kidicarus", formatted_name)
     
     # Game & Watch
     if "game & watch" in game_lower or "game and watch" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("gameandwatch", formatted_name)
     
     # Punch-Out!! games
     if "punch-out" in game_lower or "punch out" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("punch-out", formatted_name)
     
     # Rhythm Heaven games
     if "rhythm heaven" in game_lower:
-        formatted_name = format_game_name_for_fandom(game_name)
+        formatted_name = format_game_name_for_fandom(normalized_game_name)
         return ("rhythmheaven", formatted_name)
     
     # Nintendo consoles (nintendo.fandom.com)
@@ -440,9 +552,81 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
     Returns:
         Tuple (content: str, image_url: Optional[str]) o None se non trovato
     """
-    # Per i giochi, usa il nome già formattato, per i personaggi prova varianti
+    # Genera varianti del nome per provare diverse combinazioni
+    # Per i giochi, prova anche varianti con/senza apostrofi, numeri, ecc.
     if is_game:
-        name_variants = [page_name]  # I giochi hanno già il formato corretto
+        # Per i giochi, prova diverse varianti per gestire errori di digitazione e varianti comuni
+        base_name = page_name.replace("_", " ").replace("%27", "'")  # Decodifica base
+        
+        # Genera varianti intelligenti
+        name_variants = []
+        
+        # 1. Nome originale formattato
+        name_variants.append(page_name)
+        
+        # 2. Base con underscore
+        name_variants.append(base_name.replace(" ", "_"))
+        
+        # 3. Varianti con/senza apostrofi
+        if "'" in base_name or "'s" in base_name:
+            # Con apostrofo
+            name_variants.append(base_name.replace(" ", "_"))
+            # Senza apostrofo
+            name_variants.append(base_name.replace("'", "").replace(" ", "_"))
+            # Apostrofo -> s (es. "Luigi's" -> "Luigis")
+            name_variants.append(base_name.replace("'s", "s").replace("'", "").replace(" ", "_"))
+            # Spazio prima di 's (es. "Luigi s" -> "Luigi's")
+            name_variants.append(base_name.replace(" s ", "'s ").replace(" s", "'s").replace(" ", "_"))
+        else:
+            # Se non c'è apostrofo, prova ad aggiungerlo in posizioni comuni
+            # Pattern: "nome s parola" -> "nome's parola" (es. "luigi s mansion" -> "luigi's mansion")
+            words = base_name.split()
+            for i in range(len(words) - 1):
+                if words[i].lower() in ["luigi", "mario", "zelda", "link", "yoshi", "wario", "waluigi", "peach", "daisy", "rosalina"]:
+                    if words[i+1].lower().startswith('s') and len(words[i+1]) > 1:
+                        # C'è già una 's', prova con apostrofo
+                        variant_words = words.copy()
+                        variant_words[i] = variant_words[i] + "'s"
+                        variant_words[i+1] = variant_words[i+1][1:]  # Rimuovi la 's'
+                        name_variants.append("_".join(variant_words))
+                    elif not words[i].endswith("'s") and not words[i].endswith("s"):
+                        # Prova ad aggiungere 's
+                        variant_words = words.copy()
+                        variant_words[i] = variant_words[i] + "'s"
+                        name_variants.append("_".join(variant_words))
+        
+        # 4. Varianti con punteggiatura
+        # Gestisci "Bros" -> "Bros."
+        if "bros" in base_name.lower():
+            name_variants.append(base_name.replace("Bros", "Bros.").replace("bros", "Bros.").replace(" ", "_"))
+            name_variants.append(base_name.replace("Bros.", "Bros").replace("bros.", "Bros").replace(" ", "_"))
+        
+        # 5. Varianti con "&" vs "and"
+        if "&" in base_name:
+            name_variants.append(base_name.replace("&", "and").replace(" ", "_"))
+        if " and " in base_name.lower():
+            name_variants.append(base_name.replace(" and ", "_&_").replace(" And ", "_&_").replace(" ", "_"))
+        
+        # 6. Title case varianti
+        title_base = base_name.title()
+        name_variants.append(title_base.replace(" ", "_"))
+        if "'" in title_base:
+            name_variants.append(title_base.replace("'", "").replace(" ", "_"))
+            name_variants.append(title_base.replace("'s", "s").replace("'", "").replace(" ", "_"))
+        
+        # 7. URL encoding dell'apostrofo
+        for variant in name_variants[:]:  # Copia la lista per iterare
+            if "'" in variant:
+                name_variants.append(variant.replace("'", "%27"))
+        
+        # Rimuovi duplicati mantenendo l'ordine
+        seen = set()
+        unique_variants = []
+        for variant in name_variants:
+            if variant and variant not in seen:
+                seen.add(variant)
+                unique_variants.append(variant)
+        name_variants = unique_variants
     else:
         # Prova diverse varianti del nome per personaggi
         name_variants = [

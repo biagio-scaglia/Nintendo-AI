@@ -325,6 +325,18 @@ Mood: {', '.join(recommended.get('mood', []))}
             reply = chat_nintendo_ai(formatted, context=context, fast_mode=is_small_talk)
             elapsed_time = time.time() - start_time
             logger.info(f"⏱️  Tempo totale per generare la risposta: {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
+            
+            # Se la risposta è vuota, usa un messaggio di fallback
+            if not reply or len(reply.strip()) == 0:
+                logger.warning("⚠️ Risposta vuota ricevuta da Ollama, uso messaggio di fallback")
+                if intent == "small_talk":
+                    reply = "Ciao! Sono qui per aiutarti con i giochi Nintendo! 🎮 Come posso aiutarti oggi?"
+                elif intent == "recommendation_request":
+                    reply = "Mi dispiace, non sono riuscito a generare una raccomandazione. Potresti provare a descrivere meglio il tipo di gioco che cerchi?"
+                elif intent == "info_request":
+                    reply = "Mi dispiace, non sono riuscito a recuperare le informazioni richieste. Potresti riprovare con una domanda più specifica?"
+                else:
+                    reply = "Mi dispiace, c'è stato un problema nella generazione della risposta. Potresti riprovare?"
         except Exception as e:
             elapsed_time = time.time() - start_time if 'start_time' in locals() else 0
             logger.error(f"Error in AI response generation dopo {elapsed_time:.2f} secondi: {e}")

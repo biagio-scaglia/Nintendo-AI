@@ -234,15 +234,48 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
             result = response.json()
             reply = result.get("response", "").strip()
             
+            # Log per debug - verifica lunghezza risposta
+            logger.info(f"Response length from Ollama: {len(reply)} characters")
+            
+            # Se la risposta è vuota, riprova con parametri diversi o restituisci messaggio di fallback
+            if not reply or len(reply) == 0:
+                logger.warning("⚠️ Ollama ha restituito una risposta vuota! Riprovo con parametri diversi...")
+                # Riprova con parametri più permissivi
+                retry_options = {
+                    "temperature": 0.9,  # Più creatività
+                    "top_p": 0.95,
+                    "num_predict": 200,  # Ridotto per evitare timeout
+                    "repeat_penalty": 1.0,  # Meno penalità
+                    "stop": []
+                }
+                try:
+                    retry_response = requests.post(
+                        OLLAMA_URL,
+                        json={
+                            "model": MODEL_NAME,
+                            "prompt": prompt_text,
+                            "stream": False,
+                            "options": retry_options
+                        },
+                        timeout=None
+                    )
+                    if retry_response.status_code == 200:
+                        retry_result = retry_response.json()
+                        reply = retry_result.get("response", "").strip()
+                        logger.info(f"Riprova: Response length: {len(reply)} characters")
+                        if not reply:
+                            logger.error("⚠️ Anche il retry ha restituito risposta vuota")
+                            return "Mi dispiace, non sono riuscito a generare una risposta. Potresti riprovare con una domanda diversa?"
+                except Exception as retry_error:
+                    logger.error(f"Errore durante il retry: {retry_error}")
+                    return "Mi dispiace, c'è stato un problema nella generazione della risposta. Potresti riprovare?"
+            
             # Verifica che la risposta non sia stata troncata (controlla se finisce a metà frase)
             if reply and not reply.endswith(('.', '!', '?', '。', '！', '？')):
                 # Se la risposta finisce a metà, potrebbe essere stata troncata
                 # Prova a completare o almeno avvisa
                 if len(reply) > 500 and not any(punct in reply[-50:] for punct in ['.', '!', '?', '。', '！', '？']):
                     logger.warning(f"Response might be truncated, length: {len(reply)}")
-            
-            # Log per debug - verifica lunghezza risposta
-            logger.info(f"Response length from Ollama: {len(reply)} characters")
             
             # Rimuovi markdown per output più pulito
             cleaned = clean_markdown(reply)
@@ -254,6 +287,7 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
             logger.info(f"Cleaned response length: {len(cleaned)} characters")
             return cleaned
         else:
+            logger.error(f"Errore HTTP {response.status_code} da Ollama")
             return "Errore nella comunicazione con Ollama."
     
     except requests.exceptions.ConnectionError:
