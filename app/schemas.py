@@ -19,6 +19,7 @@ class GameInfo(BaseModel):
     difficulty: str
     modes: List[str]
     keywords: List[str]
+    image_url: Optional[str] = None
 
 class ChatRequest(BaseModel):
     history: List[Message]

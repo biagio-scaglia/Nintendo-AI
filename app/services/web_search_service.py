@@ -125,6 +125,12 @@ def extract_entity_name(query: str) -> str:
     
     return query_lower
 
+def search_game_image(game_title: str) -> Optional[str]:
+    """
+    Funzionalità immagini rimossa - restituisce sempre None.
+    """
+    return None
+
 def get_web_game_info(game_title: str, query: str = "") -> Optional[Dict]:
     """
     Cerca informazioni su un gioco/personaggio su internet e restituisce un dict strutturato

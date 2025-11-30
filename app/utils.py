@@ -1,7 +1,17 @@
 from typing import List, Dict, Any
 
 def sanitize_user_input(text: str) -> str:
-    banned = ["ignore previous", "change your role", "system:", "you are now", "forget", "disregard", "override"]
+    """
+    Protegge l'AI da tentativi di prompt injection e manipolazione.
+    NON filtra contenuti NSFW, solo tentativi di jailbreak.
+    """
+    # Parole chiave per prompt injection e jailbreak
+    banned = [
+        "ignore previous", "change your role", "system:", "you are now", 
+        "forget", "disregard", "override", "jailbreak", "dan mode",
+        "you are a", "act as", "pretend to be", "roleplay as",
+        "forget all", "ignore all", "new instructions", "new rules"
+    ]
     lowered = text.lower()
     
     if any(b in lowered for b in banned):

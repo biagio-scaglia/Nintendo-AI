@@ -248,24 +248,16 @@ Mood: {', '.join(recommended.get('mood', []))}
 - Se l'utente non ha specificato la console, chiedigliela per essere più preciso"""
         
         formatted = format_for_engine(validated)
-        reply = chat_nintendo_ai(formatted, context=context)
         
-        # Se è una query su personaggio, NON cercare giochi raccomandati
-        is_character_query = any(phrase in last_user_message.lower() for phrase in ["chi è", "cos'è", "cosa è"])
+        try:
+            reply = chat_nintendo_ai(formatted, context=context)
+        except Exception as e:
+            logger.error(f"Error in AI response generation: {e}")
+            reply = "Mi dispiace, c'è stato un errore nella generazione della risposta. Puoi riprovare con una domanda diversa sui giochi Nintendo?"
         
-        # Se non abbiamo ancora trovato un gioco raccomandato, proviamo dopo (SOLO se NON è query su personaggio)
-        if not is_character_query and not recommended_game and not game_info:
-            tags = extract_tags_from_response(reply)
-            games = load_games()
-            recommended = smart_recommend(games, tags, user_text=all_text)
-            
-            if recommended:
-                recommended_game = Game(
-                    title=recommended.get("title", ""),
-                    platform=recommended.get("platform", ""),
-                    tags=recommended.get("tags", []),
-                    mood=recommended.get("mood", [])
-                )
+        # NON cercare giochi raccomandati automaticamente se non esplicitamente richiesto
+        # I giochi raccomandati vengono mostrati SOLO quando l'intent è "recommendation_request"
+        # Questo evita di mostrare card non inerenti quando l'utente chiede solo informazioni
         
         logger.info("Chat response generated successfully")
         logger.info(f"Returning response with info: {game_info is not None}, recommended_game: {recommended_game is not None}")
