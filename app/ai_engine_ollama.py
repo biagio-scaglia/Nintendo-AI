@@ -2,6 +2,7 @@ import requests
 from typing import List, Dict
 import re
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +195,9 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
     prompt_text += "Assistant:"
     
     try:
+        start_time = time.time()
+        logger.info("Inizio chiamata a Ollama...")
+        
         response = requests.post(
             OLLAMA_URL,
             json={
@@ -208,8 +212,11 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
                     "stop": []  # Rimuovi stop tokens per permettere risposte più lunghe
                 }
             },
-            timeout=90  # Timeout aumentato per permettere ricerche web + generazione AI
+            timeout=None  # Nessun timeout - aspetta finché non risponde
         )
+        
+        elapsed_time = time.time() - start_time
+        logger.info(f"✅ Ollama ha risposto in {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
         
         if response.status_code == 200:
             result = response.json()
@@ -239,10 +246,9 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
     
     except requests.exceptions.ConnectionError:
         return "Errore: Ollama non è in esecuzione. Avvia Ollama e assicurati che il modello sia installato."
-    except requests.exceptions.Timeout:
-        return "Errore: Timeout nella comunicazione con Ollama. Riprova più tardi."
     except Exception as e:
-        logger.error(f"Error in chat_nintendo_ai: {str(e)}")
+        elapsed_time = time.time() - start_time if 'start_time' in locals() else 0
+        logger.error(f"Error in chat_nintendo_ai dopo {elapsed_time:.2f} secondi: {str(e)}")
         return "Mi dispiace, c'è stato un errore nella generazione della risposta. Puoi riprovare con una domanda diversa?"
 
 def initialize_model():

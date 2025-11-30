@@ -10,6 +10,7 @@ import uvicorn
 import logging
 import re
 import json
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -254,9 +255,14 @@ Mood: {', '.join(recommended.get('mood', []))}
         formatted = format_for_engine(validated)
         
         try:
+            start_time = time.time()
+            logger.info("⏱️  Inizio generazione risposta AI...")
             reply = chat_nintendo_ai(formatted, context=context)
+            elapsed_time = time.time() - start_time
+            logger.info(f"⏱️  Tempo totale per generare la risposta: {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
         except Exception as e:
-            logger.error(f"Error in AI response generation: {e}")
+            elapsed_time = time.time() - start_time if 'start_time' in locals() else 0
+            logger.error(f"Error in AI response generation dopo {elapsed_time:.2f} secondi: {e}")
             reply = "Mi dispiace, c'è stato un errore nella generazione della risposta. Puoi riprovare con una domanda diversa sui giochi Nintendo?"
         
         # NON cercare giochi raccomandati automaticamente se non esplicitamente richiesto
