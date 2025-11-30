@@ -86,17 +86,39 @@ def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[st
     ace_attorney_chars = ["godot", "maya fey", "miles edgeworth", "apollo justice", "franziska", 
                          "dahlia", "iris", "trucy", "athena", "phoenix", "edgeworth", "gumshoe"]
     
+    # Mapping per nomi completi dei personaggi (nome corto -> nome completo su Fandom)
+    ace_attorney_full_names = {
+        "gumshoe": "Dick Gumshoe",
+        "phoenix": "Phoenix Wright",
+        "edgeworth": "Miles Edgeworth",
+        "maya": "Maya Fey",
+        "apollo": "Apollo Justice",
+        "franziska": "Franziska von Karma",
+        "dahlia": "Dahlia Hawthorne",
+        "iris": "Iris",
+        "trucy": "Trucy Wright",
+        "athena": "Athena Cykes"
+    }
+    
     # Se la query menziona esplicitamente Ace Attorney, usa quella serie
     if any(kw in query_lower for kw in ace_attorney_series_keywords):
         char_name = entity_name.strip()
-        # Capitalizza correttamente (prima lettera maiuscola, resto minuscolo)
-        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        # Controlla se c'è un nome completo nel mapping
+        if char_name.lower() in ace_attorney_full_names:
+            char_name = ace_attorney_full_names[char_name.lower()]
+        else:
+            # Capitalizza correttamente (prima lettera maiuscola, resto minuscolo)
+            char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
         return ("aceattorney", char_name)
     
     # Altrimenti controlla se il personaggio è di Ace Attorney
     if any(kw in combined for kw in ace_attorney_chars):
         char_name = entity_name.strip()
-        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        # Controlla se c'è un nome completo nel mapping
+        if char_name.lower() in ace_attorney_full_names:
+            char_name = ace_attorney_full_names[char_name.lower()]
+        else:
+            char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
         return ("aceattorney", char_name)
     
     # Zelda
@@ -152,15 +174,18 @@ def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[st
     
     return None
 
-def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) -> Optional[str]:
+def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) -> Optional[tuple]:
     """
-    Fa scraping di una pagina Fandom e estrae il contenuto principale.
+    Fa scraping di una pagina Fandom e estrae il contenuto principale e la prima immagine.
     Prova diverse varianti del nome se la prima non funziona.
     
     Args:
         fandom_name: Nome del fandom (es. "aceattorney", "zelda")
         page_name: Nome della pagina (personaggio o gioco già formattato)
         is_game: Se True, è un gioco (usa formattazione diversa)
+    
+    Returns:
+        Tuple (content: str, image_url: Optional[str]) o None se non trovato
     """
     # Per i giochi, usa il nome già formattato, per i personaggi prova varianti
     if is_game:
@@ -189,6 +214,71 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
+                
+                # Estrai la prima immagine PRIMA di rimuovere gli elementi
+                image_url = None
+                
+                # Cerca immagini nell'infobox (spesso contiene l'immagine principale)
+                infobox = soup.find('aside', class_=re.compile(r'infobox|portable-infobox'))
+                if infobox:
+                    img = infobox.find('img')
+                    if img and img.get('src'):
+                        src = img.get('src')
+                        # Filtra placeholder, base64 vuoti, e immagini troppo piccole
+                        if (src and 
+                            not src.startswith('data:image') and 
+                            not '1x1' in src.lower() and
+                            not 'pixel' in src.lower() and
+                            len(src) > 20):
+                            image_url = src
+                            # Se è un URL relativo, convertilo in assoluto
+                            if image_url.startswith('//'):
+                                image_url = 'https:' + image_url
+                            elif image_url.startswith('/'):
+                                image_url = f'https://{fandom_name}.fandom.com' + image_url
+                            logger.info(f"Immagine trovata nell'infobox: {image_url}")
+                
+                # Se non trovata nell'infobox, cerca nella pagina principale
+                if not image_url:
+                    main_content_temp = soup.find('div', class_='mw-parser-output') or soup.find('div', id='content')
+                    if main_content_temp:
+                        # Cerca la prima immagine significativa (non icone, non piccole)
+                        images = main_content_temp.find_all('img')
+                        for img in images:
+                            src = img.get('src', '')
+                            # Evita immagini troppo piccole, icone, o decorative
+                            width = img.get('width', '')
+                            height = img.get('height', '')
+                            if (src and 
+                                not src.startswith('data:image') and 
+                                not '1x1' in src.lower() and
+                                not 'pixel' in src.lower() and
+                                len(src) > 20 and
+                                not any(skip in src.lower() for skip in ['icon', 'logo', 'button', 'arrow', 'thumb'])):
+                                # Preferisci immagini più grandi
+                                if width and height:
+                                    try:
+                                        w = int(str(width).replace('px', ''))
+                                        h = int(str(height).replace('px', ''))
+                                        if w > 100 and h > 100:  # Almeno 100x100px
+                                            image_url = src
+                                            if image_url.startswith('//'):
+                                                image_url = 'https:' + image_url
+                                            elif image_url.startswith('/'):
+                                                image_url = f'https://{fandom_name}.fandom.com' + image_url
+                                            logger.info(f"Immagine trovata nella pagina: {image_url}")
+                                            break
+                                    except:
+                                        pass
+                                else:
+                                    # Se non ha dimensioni specificate, prova comunque (ma solo se non è placeholder)
+                                    image_url = src
+                                    if image_url.startswith('//'):
+                                        image_url = 'https:' + image_url
+                                    elif image_url.startswith('/'):
+                                        image_url = f'https://{fandom_name}.fandom.com' + image_url
+                                    logger.info(f"Immagine trovata nella pagina (senza dimensioni): {image_url}")
+                                    break
                 
                 # Rimuovi elementi non necessari (nav, header, footer, script, style, infobox, tabelle, note, riferimenti)
                 for element in soup.find_all(['nav', 'header', 'footer', 'aside', 'script', 'style', 
@@ -263,7 +353,9 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
                     
                     if len(content_text) > 150:
                         logger.info(f"✅ Contenuto Fandom estratto: {len(content_text)} caratteri")
-                        return content_text[:3000]  # Aumentato a 3000 caratteri per più accuratezza
+                        if image_url:
+                            logger.info(f"✅ Immagine trovata: {image_url}")
+                        return (content_text[:3000], image_url)  # Restituisce tupla (contenuto, image_url)
                 else:
                     logger.warning(f"Contenuto Fandom troppo corto: {len(content_text)} caratteri")
                     # Prova la prossima variante
@@ -287,11 +379,11 @@ def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) 
     logger.warning(f"Nessuna variante del nome ha funzionato per {page_name} su {fandom_name}.fandom.com")
     return None
 
-def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
+def search_web_game_info(game_title: str, query: str = "") -> tuple:
     """
     Cerca informazioni su un gioco/personaggio Nintendo su internet.
     Prima prova Fandom, poi fallback su DuckDuckGo/Google.
-    Restituisce una stringa con informazioni trovate o None.
+    Restituisce una tupla (contenuto: str, image_url: Optional[str]) o (None, None) se non trovato.
     """
     try:
         # Estrai il nome dell'entità
@@ -305,10 +397,11 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
             fandom_name, formatted_game_name = fandom_game_info
             logger.info(f"Rilevato gioco Fandom: {fandom_name} - {formatted_game_name}")
             
-            fandom_content = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True)
-            if fandom_content:
+            fandom_result = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True)
+            if fandom_result:
+                fandom_content, image_url = fandom_result
                 logger.info(f"✅ Informazioni trovate su Fandom per gioco: {formatted_game_name}")
-                return fandom_content
+                return (fandom_content, image_url)
         
         # SECONDA PRIORITÀ: Prova Fandom per PERSONAGGI
         fandom_info = detect_fandom_series(entity_name, query)
@@ -316,10 +409,11 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
             fandom_name, character_name = fandom_info
             logger.info(f"Rilevata serie Fandom: {fandom_name} per personaggio: {character_name}")
             
-            fandom_content = scrape_fandom_page(fandom_name, character_name, is_game=False)
-            if fandom_content:
+            fandom_result = scrape_fandom_page(fandom_name, character_name, is_game=False)
+            if fandom_result:
+                fandom_content, image_url = fandom_result
                 logger.info(f"✅ Informazioni trovate su Fandom per {character_name}")
-                return fandom_content
+                return (fandom_content, image_url)
         
         # FALLBACK: Se Fandom non funziona, usa DuckDuckGo/Google
         logger.info(f"Fandom non disponibile, uso ricerca tradizionale per: {entity_name}")
@@ -393,22 +487,22 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
                     if text and len(text) > 50:
                         text_lower = text.lower()
                         if any(keyword in text_lower for keyword in ['nintendo', 'zelda', 'mario', 'pokemon', 'character', 'game', 'princess', 'principessa']):
-                            return text[:500]
+                            return (text[:500], None)  # Restituisce tupla (contenuto, None per immagine)
         except:
             pass
         
-        return None
+        return (None, None)
         
     except Exception as e:
         logger.warning(f"Errore nella ricerca web per {game_title}: {str(e)}")
-        return None
+        return (None, None)
 
 def get_web_context(game_title: str, additional_query: str = "") -> Optional[str]:
     """
     Ottiene contesto da web per un gioco quando non disponibile localmente.
     Restituisce una stringa formattata con informazioni trovate.
     """
-    web_info = search_web_game_info(game_title, additional_query)
+    web_info, _ = search_web_game_info(game_title, additional_query)  # Ignora immagine nel contesto
     
     if web_info:
         return f"""
@@ -421,18 +515,26 @@ Usa queste informazioni con cautela e menziona all'utente che sono informazioni 
 """
     return None
 
+def get_web_image_url(game_title: str, query: str = "") -> Optional[str]:
+    """
+    Ottiene l'URL dell'immagine da Fandom per un personaggio/gioco.
+    """
+    _, image_url = search_web_game_info(game_title, query)
+    return image_url
+
 def extract_entity_name(query: str) -> str:
     """
     Estrae il nome dell'entità (gioco/personaggio) dalla query.
     Es: "chi è yoshi?" -> "yoshi"
+    Es: "mi parli di godot in ace attorney" -> "godot"
     """
     query_lower = query.lower().strip()
     
     # Rimuovi frasi comuni
     phrases_to_remove = [
         "chi è", "cos'è", "cosa è", "chi e", "cos e", "cosa e",
-        "dimmi di", "parlami di", "info su", "informazioni su",
-        "raccontami di", "spiegami", "che cos'è", "che cosa è"
+        "dimmi di", "parlami di", "mi parli di", "info su", "informazioni su",
+        "raccontami di", "spiegami", "che cos'è", "che cosa è", "dimmi informazioni su"
     ]
     
     for phrase in phrases_to_remove:
@@ -441,6 +543,9 @@ def extract_entity_name(query: str) -> str:
             parts = query_lower.split(phrase, 1)
             if len(parts) > 1:
                 entity = parts[1].strip()
+                # Rimuovi eventuali frasi successive come "in ace attorney", "della saga", ecc.
+                # Prendi solo la prima parte (il nome del personaggio)
+                entity = entity.split(" in ")[0].split(" della ")[0].split(" da ")[0].split(" di ")[0]
                 # Rimuovi punteggiatura finale
                 entity = entity.rstrip("?.,!;:")
                 return entity.strip()
@@ -468,7 +573,7 @@ def get_web_game_info(game_title: str, query: str = "") -> Optional[Dict]:
     if not clean_name:
         clean_name = game_title
     
-    web_info = search_web_game_info(clean_name, query)
+    web_info, image_url = search_web_game_info(clean_name, query)
     
     if not web_info:
         return None
@@ -497,6 +602,7 @@ def get_web_game_info(game_title: str, query: str = "") -> Optional[Dict]:
         "gameplay": web_info,  # Usa tutto il testo come gameplay
         "difficulty": "N/A",  # Non disponibile da web
         "modes": [],  # Non disponibile da web
-        "keywords": []  # Potremmo estrarli ma per ora vuoto
+        "keywords": [],  # Potremmo estrarli ma per ora vuoto
+        "image_url": image_url  # URL dell'immagine da Fandom
     }
 

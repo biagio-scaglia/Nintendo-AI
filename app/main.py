@@ -5,7 +5,7 @@ from app.ai_engine_ollama import chat_nintendo_ai
 from app.utils import validate_history, format_for_engine, classify_intent
 from app.services.recommender_service import load_games, filter_by_platform, smart_recommend, get_similar_games
 from app.services.info_service import get_game_info, search_game_info, get_context_for_ai
-from app.services.web_search_service import get_web_context, get_web_game_info
+from app.services.web_search_service import get_web_context, get_web_game_info, get_web_image_url, extract_entity_name
 import uvicorn
 import logging
 import re
@@ -116,20 +116,47 @@ async def chat_endpoint(payload: ChatRequest):
         
         # Se è una richiesta di informazioni, cerca il gioco specifico
         if intent == "info_request":
-            # Distingui tra richieste su personaggi ("chi è") e richieste su giochi
-            is_character_query = any(phrase in last_user_message.lower() for phrase in ["chi è", "cos'è", "cosa è"])
+            # Distingui tra richieste su personaggi e richieste su giochi
+            is_character_query = any(phrase in last_user_message.lower() for phrase in [
+                "chi è", "cos'è", "cosa è", "chi e", "cos e", "cosa e",
+                "mi parli di", "parlami di", "dimmi di", "raccontami di",
+                "info su", "informazioni su", "che cos'è", "che cosa è"
+            ])
             
             if is_character_query:
                 # Per personaggi, vai direttamente a web (non cercare nel database giochi)
                 logger.info(f"Character query detected, searching web for: {last_user_message}")
                 try:
-                    web_context = get_web_context(last_user_message, "")
+                    # Passa l'intera query come additional_query per mantenere il contesto (es. "in ace attorney")
+                    web_context = get_web_context(last_user_message, last_user_message)
                     if web_context:
                         context = web_context
-                        # NON creare GameInfo per personaggi - solo risposta testuale
+                        # Crea GameInfo SOLO se c'è un'immagine da mostrare
+                        image_url = get_web_image_url(last_user_message, last_user_message)
+                        # Filtra immagini placeholder o base64 vuote
+                        if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
+                            # Crea GameInfo minimale solo con immagine per il frontend
+                            entity_name = extract_entity_name(last_user_message)
+                            if not entity_name:
+                                entity_name = last_user_message.strip()
+                            game_info = GameInfo(
+                                title=entity_name.title(),
+                                platform="Nintendo",
+                                description="",
+                                gameplay="",
+                                difficulty="N/A",
+                                modes=[],
+                                keywords=[],
+                                image_url=image_url
+                            )
+                            logger.info(f"Created GameInfo with image for character: {entity_name}")
+                        else:
+                            game_info = None
+                    else:
                         game_info = None
                 except Exception as e:
                     logger.warning(f"Web search failed for character query: {e}")
+                    game_info = None
                     # Continua senza info web, l'AI userà la sua conoscenza
             else:
                 # Per giochi, prova prima Fandom (più accurato), poi database locale
@@ -160,8 +187,13 @@ async def chat_endpoint(payload: ChatRequest):
                         if web_context:
                             context = web_context
                 
-                # Crea GameInfo strutturato da web per il frontend (solo se non già presente e se abbiamo web_context)
-                if not game_info and web_context:
+                # Crea GameInfo strutturato da web per il frontend (solo se non già presente, se abbiamo web_context E se NON è un personaggio)
+                # Verifica se è un personaggio controllando se detect_fandom_series trova qualcosa
+                from app.services.web_search_service import detect_fandom_series, extract_entity_name
+                entity_name = extract_entity_name(last_user_message)
+                is_character = detect_fandom_series(entity_name, last_user_message) is not None
+                
+                if not game_info and web_context and not is_character:
                     web_game_info = get_web_game_info(last_user_message, "")
                     if web_game_info:
                         try:
@@ -169,6 +201,10 @@ async def chat_endpoint(payload: ChatRequest):
                             logger.info(f"Created GameInfo from web for game query")
                         except Exception as e:
                             logger.warning(f"Failed to create GameInfo from web: {e}")
+                elif is_character:
+                    # È un personaggio, non creare la card
+                    game_info = None
+                    logger.info(f"Personaggio rilevato, non creo GameInfo card")
         
         # Se è una richiesta di raccomandazione, trova il gioco PRIMA di generare la risposta
         elif intent == "recommendation_request":
@@ -256,7 +292,9 @@ Mood: {', '.join(recommended.get('mood', []))}
         try:
             start_time = time.time()
             logger.info("⏱️  Inizio generazione risposta AI...")
-            reply = chat_nintendo_ai(formatted, context=context)
+            # Per small_talk, usa parametri più veloci (risposte più brevi)
+            is_small_talk = intent == "small_talk"
+            reply = chat_nintendo_ai(formatted, context=context, fast_mode=is_small_talk)
             elapsed_time = time.time() - start_time
             logger.info(f"⏱️  Tempo totale per generare la risposta: {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
         except Exception as e:

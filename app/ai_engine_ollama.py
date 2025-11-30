@@ -37,7 +37,7 @@ def clean_markdown(text: str) -> str:
     
     return text
 
-def chat_nintendo_ai(history: List[Dict], context: str = "") -> str:
+def chat_nintendo_ai(history: List[Dict], context: str = "", fast_mode: bool = False) -> str:
     system_prompt = """Sei Nintendo AI Advisor, un chatbot esperto e appassionato di videogiochi Nintendo. La tua missione è aiutare le persone a trovare il gioco perfetto per loro!
 
 ═══════════════════════════════════════════════════════════════
@@ -198,19 +198,31 @@ USA SOLO QUESTE. NON AGGIUNGERE NULLA.
         start_time = time.time()
         logger.info("Inizio chiamata a Ollama...")
         
+        # Parametri ottimizzati per velocità in modalità fast (small_talk)
+        if fast_mode:
+            options = {
+                "temperature": 0.7,  # Leggermente più deterministico
+                "top_p": 0.85,
+                "num_predict": 150,  # Risposte brevi per small_talk
+                "repeat_penalty": 1.1,
+                "stop": []
+            }
+        else:
+            options = {
+                "temperature": 0.8,
+                "top_p": 0.9,
+                "num_predict": 800,  # Aumentato per risposte complete e non tagliate
+                "repeat_penalty": 1.1,
+                "stop": []  # Rimuovi stop tokens per permettere risposte più lunghe
+            }
+        
         response = requests.post(
             OLLAMA_URL,
             json={
                 "model": MODEL_NAME,
                 "prompt": prompt_text,
                 "stream": False,
-                "options": {
-                    "temperature": 0.8,
-                    "top_p": 0.9,
-                    "num_predict": 800,  # Aumentato per risposte complete e non tagliate
-                    "repeat_penalty": 1.1,
-                    "stop": []  # Rimuovi stop tokens per permettere risposte più lunghe
-                }
+                "options": options
             },
             timeout=None  # Nessun timeout - aspetta finché non risponde
         )
