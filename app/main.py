@@ -144,20 +144,27 @@ async def chat_endpoint(payload: ChatRequest):
                             logger.info(f"Found game info in local database: {game_info_data.get('title')}")
                         except Exception as e:
                             logger.warning(f"Failed to create GameInfo from local: {e}")
-                else:
-                    # Se non trovato localmente, prova ricerca web
-                    logger.info(f"Game not found locally, searching web for: {last_user_message}")
+                
+                # Se non trovato localmente (context vuoto O game_info non creato), prova ricerca web
+                if not context or not game_info:
+                    logger.info(f"Game not found locally or info incomplete, searching web for: {last_user_message}")
                     web_context = get_web_context(last_user_message, "")
                     if web_context:
-                        context = web_context
-                        # Crea GameInfo strutturato anche da web per il frontend
-                        web_game_info = get_web_game_info(last_user_message, "")
-                        if web_game_info:
-                            try:
-                                game_info = GameInfo(**web_game_info)
-                                logger.info(f"Created GameInfo from web for game query")
-                            except Exception as e:
-                                logger.warning(f"Failed to create GameInfo from web: {e}")
+                        # Se abbiamo già un context locale, aggiungi info web, altrimenti usa solo web
+                        if context:
+                            context = f"{context}\n\n🌐 INFORMAZIONI AGGIUNTIVE DA WEB:\n{web_context}"
+                        else:
+                            context = web_context
+                        
+                        # Crea GameInfo strutturato anche da web per il frontend (solo se non già presente)
+                        if not game_info:
+                            web_game_info = get_web_game_info(last_user_message, "")
+                            if web_game_info:
+                                try:
+                                    game_info = GameInfo(**web_game_info)
+                                    logger.info(f"Created GameInfo from web for game query")
+                                except Exception as e:
+                                    logger.warning(f"Failed to create GameInfo from web: {e}")
         
         # Se è una richiesta di raccomandazione, trova il gioco PRIMA di generare la risposta
         elif intent == "recommendation_request":
@@ -243,8 +250,11 @@ Mood: {', '.join(recommended.get('mood', []))}
         formatted = format_for_engine(validated)
         reply = chat_nintendo_ai(formatted, context=context)
         
-        # Se non abbiamo ancora trovato un gioco raccomandato, proviamo dopo
-        if not recommended_game and not game_info:
+        # Se è una query su personaggio, NON cercare giochi raccomandati
+        is_character_query = any(phrase in last_user_message.lower() for phrase in ["chi è", "cos'è", "cosa è"])
+        
+        # Se non abbiamo ancora trovato un gioco raccomandato, proviamo dopo (SOLO se NON è query su personaggio)
+        if not is_character_query and not recommended_game and not game_info:
             tags = extract_tags_from_response(reply)
             games = load_games()
             recommended = smart_recommend(games, tags, user_text=all_text)

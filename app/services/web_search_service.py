@@ -9,12 +9,17 @@ logger = logging.getLogger(__name__)
 
 def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
     """
-    Cerca informazioni su un gioco Nintendo su internet.
+    Cerca informazioni su un gioco/personaggio Nintendo su internet.
     Restituisce una stringa con informazioni trovate o None.
     """
     try:
-        # Costruisci query di ricerca
-        search_query = f"{game_title} Nintendo game" if not query else f"{game_title} {query} Nintendo"
+        # Costruisci query di ricerca - includi info generali (uscita, piattaforma)
+        base_query = f"{game_title} Nintendo"
+        if not query:
+            # Aggiungi termini per info generali (data uscita, piattaforma, sviluppatore)
+            search_query = f"{base_query} release date platform developer"
+        else:
+            search_query = f"{base_query} {query}"
         
         # Usa DuckDuckGo Instant Answer API (più affidabile)
         api_url = "https://api.duckduckgo.com/"

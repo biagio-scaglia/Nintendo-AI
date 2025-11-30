@@ -6,10 +6,12 @@ Sistema intelligente di raccomandazione giochi Nintendo basato su AI, con API RE
 
 - 🤖 **AI-Powered Recommendations**: Consigli personalizzati basati su umore e preferenze
 - 💬 **Chat Interattiva**: Interfaccia conversazionale per scoprire giochi Nintendo
-- 📱 **App Flutter**: Applicazione mobile cross-platform (Android/iOS)
+- 📱 **App Flutter**: Applicazione mobile cross-platform (Android/iOS) con visualizzazione strutturata
 - 🔍 **Ricerca Intelligente**: Sistema RAG per informazioni dettagliate sui giochi
-- 🌐 **API REST**: Backend FastAPI con supporto Ollama
+- 🌐 **Ricerca Web Integrata**: Cerca automaticamente su internet giochi e personaggi non nel database
 - 🎯 **42 Giochi Nintendo**: Database completo con tags e mood bilingue (IT/EN)
+- 👤 **Info Personaggi**: Supporto per domande su personaggi Nintendo (es. "chi è yoshi?")
+- 📊 **Card Informative**: Visualizzazione strutturata di informazioni giochi e personaggi nel frontend
 
 ## 🏗️ Architettura
 
@@ -114,6 +116,8 @@ Content-Type: application/json
 2. **Raccomandazione**: Confronta i tag estratti con il database di 42 giochi Nintendo
 3. **Matching Intelligente**: Trova il gioco con la migliore corrispondenza
 4. **Risposta Contestuale**: Se richiesto, recupera informazioni dettagliate dal sistema RAG
+5. **Ricerca Web**: Se un gioco o personaggio non è nel database, cerca automaticamente su internet
+6. **Visualizzazione Strutturata**: Le informazioni vengono mostrate in card colorate nel frontend
 
 ## 🗄️ Database Giochi
 
@@ -158,10 +162,11 @@ static const String baseUrl = 'http://localhost:8000';
 
 ### Struttura Backend
 
-- **`app/main.py`**: Server FastAPI principale
-- **`app/ai_engine_ollama.py`**: Integrazione con Ollama
+- **`app/main.py`**: Server FastAPI principale con logica di routing query
+- **`app/ai_engine_ollama.py`**: Integrazione con Ollama e pulizia markdown
 - **`app/services/recommender_service.py`**: Logica di raccomandazione
 - **`app/services/info_service.py`**: Sistema RAG per info giochi
+- **`app/services/web_search_service.py`**: Ricerca web per giochi/personaggi non nel DB
 - **`app/knowledge/rag_engine.py`**: Motore di ricerca semantica
 - **`app/db/nintendo_games.json`**: Database giochi con tags/mood
 - **`app/knowledge/game_details.json`**: Dettagli completi giochi
@@ -198,12 +203,27 @@ ollama pull qwen3:8b
 ollama list
 ```
 
+## 🌐 Ricerca Web
+
+Il sistema include ricerca web automatica per:
+- **Giochi non nel database**: Cerca informazioni su giochi Nintendo non presenti localmente
+- **Personaggi**: Supporta domande su personaggi Nintendo (es. "chi è yoshi?", "cos'è link?")
+- **Info generali**: Fornisce data di uscita, piattaforme, sviluppatore, descrizione generale
+
+**Limitazioni**: Il sistema fornisce solo informazioni generali sui giochi. Non risponde a:
+- Guide su come battere livelli
+- Strategie di gioco specifiche
+- Walkthrough o soluzioni puzzle
+- Trucchi o cheat codes
+
 ## 📝 Note
 
 - Il sistema usa **solo Ollama** (nessun modello locale)
 - I mood sono in formato bilingue per supportare italiano e inglese
 - L'API supporta CORS per richieste cross-origin
 - Il database include giochi per Switch, Wii U, Wii, 3DS, DS
+- Le risposte vengono pulite automaticamente da formattazione markdown
+- Il frontend mostra card informative per giochi raccomandati e informazioni strutturate
 
 ## 📄 Licenza
 
