@@ -126,50 +126,49 @@ async def chat_endpoint(payload: ChatRequest):
                     web_context = get_web_context(last_user_message, "")
                     if web_context:
                         context = web_context
-                        # Crea GameInfo strutturato anche da web per il frontend
-                        web_game_info = get_web_game_info(last_user_message, "")
-                        if web_game_info:
-                            try:
-                                game_info = GameInfo(**web_game_info)
-                                logger.info(f"Created GameInfo from web for character query")
-                            except Exception as e:
-                                logger.warning(f"Failed to create GameInfo from web: {e}")
+                        # NON creare GameInfo per personaggi - solo risposta testuale
+                        game_info = None
                 except Exception as e:
                     logger.warning(f"Web search failed for character query: {e}")
                     # Continua senza info web, l'AI userà la sua conoscenza
             else:
-                # Per giochi, cerca prima nel database locale
-                context = get_context_for_ai(last_user_message)
-                if context:
-                    search_results = search_game_info(last_user_message, top_k=1)
-                    if search_results:
-                        try:
-                            game_info_data = search_results[0]
-                            game_info = GameInfo(**game_info_data)
-                            logger.info(f"Found game info in local database: {game_info_data.get('title')}")
-                        except Exception as e:
-                            logger.warning(f"Failed to create GameInfo from local: {e}")
+                # Per giochi, prova prima Fandom (più accurato), poi database locale
+                logger.info(f"Game query detected, trying Fandom first for: {last_user_message}")
+                web_context = get_web_context(last_user_message, "")
                 
-                # Se non trovato localmente (context vuoto O game_info non creato), prova ricerca web
-                if not context or not game_info:
-                    logger.info(f"Game not found locally or info incomplete, searching web for: {last_user_message}")
-                    web_context = get_web_context(last_user_message, "")
-                    if web_context:
-                        # Se abbiamo già un context locale, aggiungi info web, altrimenti usa solo web
-                        if context:
-                            context = f"{context}\n\n🌐 INFORMAZIONI AGGIUNTIVE DA WEB:\n{web_context}"
-                        else:
+                if web_context:
+                    # Fandom ha trovato informazioni - usale come fonte principale
+                    context = web_context
+                    logger.info(f"✅ Using Fandom as primary source for game info")
+                else:
+                    # Fallback: cerca nel database locale
+                    context = get_context_for_ai(last_user_message)
+                    if context:
+                        search_results = search_game_info(last_user_message, top_k=1)
+                        if search_results:
+                            try:
+                                game_info_data = search_results[0]
+                                game_info = GameInfo(**game_info_data)
+                                logger.info(f"Found game info in local database: {game_info_data.get('title')}")
+                            except Exception as e:
+                                logger.warning(f"Failed to create GameInfo from local: {e}")
+                    
+                    # Se ancora non trovato, prova ricerca web tradizionale
+                    if not context:
+                        logger.info(f"Game not found in Fandom or local DB, trying traditional web search")
+                        web_context = get_web_context(last_user_message, "")
+                        if web_context:
                             context = web_context
-                        
-                        # Crea GameInfo strutturato anche da web per il frontend (solo se non già presente)
-                        if not game_info:
-                            web_game_info = get_web_game_info(last_user_message, "")
-                            if web_game_info:
-                                try:
-                                    game_info = GameInfo(**web_game_info)
-                                    logger.info(f"Created GameInfo from web for game query")
-                                except Exception as e:
-                                    logger.warning(f"Failed to create GameInfo from web: {e}")
+                
+                # Crea GameInfo strutturato da web per il frontend (solo se non già presente e se abbiamo web_context)
+                if not game_info and web_context:
+                    web_game_info = get_web_game_info(last_user_message, "")
+                    if web_game_info:
+                        try:
+                            game_info = GameInfo(**web_game_info)
+                            logger.info(f"Created GameInfo from web for game query")
+                        except Exception as e:
+                            logger.warning(f"Failed to create GameInfo from web: {e}")
         
         # Se è una richiesta di raccomandazione, trova il gioco PRIMA di generare la risposta
         elif intent == "recommendation_request":

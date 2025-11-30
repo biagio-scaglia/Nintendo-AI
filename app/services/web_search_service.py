@@ -8,6 +8,69 @@ import urllib.parse
 
 logger = logging.getLogger(__name__)
 
+def format_game_name_for_fandom(game_name: str) -> str:
+    """
+    Formatta il nome del gioco per l'URL Fandom.
+    Es: "Phoenix Wright: Ace Attorney - Trials and Tribulations" -> "Phoenix_Wright:_Ace_Attorney_-_Trials_and_Tribulations"
+    """
+    # Sostituisci spazi con underscore, mantieni due punti e trattini
+    formatted = game_name.replace(" ", "_")
+    return formatted
+
+def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, str]]:
+    """
+    Rileva se è un gioco Nintendo e restituisce (fandom_name, formatted_game_name).
+    Es: ("aceattorney", "Phoenix_Wright:_Ace_Attorney_-_Trials_and_Tribulations")
+    """
+    game_lower = game_name.lower().strip()
+    query_lower = query.lower() if query else ""
+    combined = f"{game_lower} {query_lower}".lower()
+    
+    # Ace Attorney games
+    ace_attorney_game_keywords = [
+        "phoenix wright", "ace attorney", "trials and tribulations", "justice for all",
+        "apollo justice", "dual destinies", "spirit of justice", "investigations",
+        "the great ace attorney", "adventures", "resolve", "turnabout", "gyakuten saiban"
+    ]
+    # Controlla anche se contiene "ace attorney" o "phoenix wright" nel nome
+    if "ace attorney" in game_lower or "phoenix wright" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("aceattorney", formatted_name)
+    if any(kw in combined for kw in ace_attorney_game_keywords):
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("aceattorney", formatted_name)
+    
+    # Zelda games
+    zelda_game_keywords = [
+        "the legend of zelda", "breath of the wild", "tears of the kingdom",
+        "ocarina of time", "majora's mask", "wind waker", "twilight princess",
+        "skyward sword", "a link to the past", "a link between worlds"
+    ]
+    if any(kw in combined for kw in zelda_game_keywords):
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("zelda", formatted_name)
+    
+    # Mario games
+    mario_game_keywords = [
+        "super mario", "mario kart", "mario party", "mario odyssey",
+        "mario galaxy", "mario sunshine", "paper mario", "mario & luigi"
+    ]
+    if any(kw in combined for kw in mario_game_keywords):
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("mario", formatted_name)
+    
+    # Pokemon games
+    pokemon_game_keywords = [
+        "pokemon", "pokémon", "red", "blue", "yellow", "gold", "silver",
+        "ruby", "sapphire", "diamond", "pearl", "black", "white", "sun", "moon",
+        "sword", "shield", "scarlet", "violet"
+    ]
+    if any(kw in combined for kw in pokemon_game_keywords):
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("pokemon", formatted_name)
+    
+    return None
+
 def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[str, str]]:
     """
     Rileva la serie Nintendo e restituisce (fandom_name, character_name).
@@ -89,18 +152,27 @@ def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[st
     
     return None
 
-def scrape_fandom_page(fandom_name: str, character_name: str) -> Optional[str]:
+def scrape_fandom_page(fandom_name: str, page_name: str, is_game: bool = False) -> Optional[str]:
     """
     Fa scraping di una pagina Fandom e estrae il contenuto principale.
     Prova diverse varianti del nome se la prima non funziona.
+    
+    Args:
+        fandom_name: Nome del fandom (es. "aceattorney", "zelda")
+        page_name: Nome della pagina (personaggio o gioco già formattato)
+        is_game: Se True, è un gioco (usa formattazione diversa)
     """
-    # Prova diverse varianti del nome
-    name_variants = [
-        character_name,  # Nome originale
-        character_name.replace(" ", "_"),  # Con underscore
-        character_name.title(),  # Title case
-        character_name.title().replace(" ", "_"),  # Title case con underscore
-    ]
+    # Per i giochi, usa il nome già formattato, per i personaggi prova varianti
+    if is_game:
+        name_variants = [page_name]  # I giochi hanno già il formato corretto
+    else:
+        # Prova diverse varianti del nome per personaggi
+        name_variants = [
+            page_name,  # Nome originale
+            page_name.replace(" ", "_"),  # Con underscore
+            page_name.title(),  # Title case
+            page_name.title().replace(" ", "_"),  # Title case con underscore
+        ]
     
     for char_url in name_variants:
         try:
@@ -118,50 +190,80 @@ def scrape_fandom_page(fandom_name: str, character_name: str) -> Optional[str]:
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 
-                # Rimuovi elementi non necessari
-                for element in soup.find_all(['nav', 'header', 'footer', 'aside', 'script', 'style']):
+                # Rimuovi elementi non necessari (nav, header, footer, script, style, infobox, tabelle, note, riferimenti)
+                for element in soup.find_all(['nav', 'header', 'footer', 'aside', 'script', 'style', 
+                                             'table', 'div'], class_=re.compile(r'infobox|sidebar|navbox|reference|notelist|mw-references-wrap')):
                     element.decompose()
                 
+                # Rimuovi anche sezioni non rilevanti
+                for section in soup.find_all(['div', 'section'], class_=re.compile(r'toc|table-of-contents|catlinks|printfooter')):
+                    section.decompose()
+                
                 # Cerca il contenuto principale della pagina
-                # Fandom usa diverse strutture, proviamo vari selettori
-                content_selectors = [
-                    'div.mw-parser-output',
-                    'div#content',
-                    'article',
-                    'div.page-content'
-                ]
+                main_content = soup.find('div', class_='mw-parser-output')
+                if not main_content:
+                    main_content = soup.find('div', id='content')
+                if not main_content:
+                    main_content = soup.find('article')
                 
-                content_text = ""
-                for selector in content_selectors:
-                    content_div = soup.select_one(selector)
-                    if content_div:
-                        # Estrai solo i paragrafi principali (evita infobox, tabelle, ecc.)
-                        paragraphs = content_div.find_all('p', limit=10)  # Primi 10 paragrafi
-                        for p in paragraphs:
-                            text = p.get_text(strip=True)
-                            if len(text) > 50:  # Solo paragrafi significativi
-                                content_text += text + " "
+                if main_content:
+                    # Rimuovi ulteriori elementi non necessari dal contenuto principale
+                    for unwanted in main_content.find_all(['aside', 'table', 'div', 'section'], 
+                                                       class_=re.compile(r'infobox|sidebar|navbox|reference|notelist|toc|catlinks|printfooter|gallery')):
+                        unwanted.decompose()
+                    
+                    # Rimuovi anche link esterni e note a piè di pagina
+                    for ref in main_content.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
+                        ref.decompose()
+                    
+                    # Estrai paragrafi principali in ordine (primi 15 per più accuratezza)
+                    paragraphs = main_content.find_all('p', limit=15)
+                    content_text = ""
+                    
+                    for p in paragraphs:
+                        # Rimuovi note e riferimenti dai paragrafi
+                        for ref in p.find_all(['sup', 'span'], class_=re.compile(r'reference|cite')):
+                            ref.decompose()
                         
-                        if len(content_text) > 200:  # Abbiamo abbastanza contenuto
-                            break
-                
-                # Se non abbiamo trovato abbastanza contenuto, prova a prendere tutto il testo principale
-                if len(content_text) < 200:
-                    main_content = soup.find('div', class_='mw-parser-output') or soup.find('div', id='content')
-                    if main_content:
-                        # Rimuovi infobox e altri elementi laterali
-                        for infobox in main_content.find_all(['aside', 'table', 'div'], class_=re.compile(r'infobox|sidebar')):
-                            infobox.decompose()
-                        
-                        content_text = main_content.get_text(separator=' ', strip=True)
-                
-                # Pulisci il testo
-                content_text = re.sub(r'\s+', ' ', content_text)  # Rimuovi spazi multipli
-                content_text = content_text.strip()
-                
-                if len(content_text) > 100:
-                    logger.info(f"✅ Contenuto Fandom estratto: {len(content_text)} caratteri")
-                    return content_text[:2000]  # Limita a 2000 caratteri
+                        text = p.get_text(separator=' ', strip=True)
+                        # Filtra paragrafi troppo corti o non significativi
+                        if len(text) > 80 and not re.match(r'^[\d\s\[\]()]+$', text):  # Evita paragrafi solo numeri/simboli
+                            content_text += text + " "
+                    
+                    # Se non abbiamo abbastanza contenuto dai paragrafi, prendi anche le liste
+                    if len(content_text) < 300:
+                        lists = main_content.find_all(['ul', 'ol'], limit=5)
+                        for ul in lists:
+                            # Evita liste di navigazione o riferimenti
+                            if not ul.find_parent(['nav', 'aside', 'div'], class_=re.compile(r'nav|sidebar|reference')):
+                                list_text = ul.get_text(separator=' ', strip=True)
+                                if len(list_text) > 50:
+                                    content_text += list_text + " "
+                    
+                    # Pulisci il testo finale in modo più accurato
+                    content_text = re.sub(r'\[\d+\]', '', content_text)  # Rimuovi riferimenti numerici [1], [2], ecc.
+                    content_text = re.sub(r'\[edit\]', '', content_text, flags=re.IGNORECASE)  # Rimuovi link [edit]
+                    content_text = re.sub(r'\[citation needed\]', '', content_text, flags=re.IGNORECASE)  # Rimuovi [citation needed]
+                    content_text = re.sub(r'See also:.*?\.', '', content_text, flags=re.IGNORECASE | re.DOTALL)  # Rimuovi "See also:" sections
+                    content_text = re.sub(r'Main article:.*?\.', '', content_text, flags=re.IGNORECASE | re.DOTALL)  # Rimuovi "Main article:" links
+                    content_text = re.sub(r'\s+', ' ', content_text)  # Rimuovi spazi multipli
+                    content_text = re.sub(r'\.{2,}', '.', content_text)  # Rimuovi punti multipli
+                    content_text = content_text.strip()
+                    
+                    # Rimuovi frasi incomplete o troppo corte all'inizio/fine
+                    sentences = content_text.split('.')
+                    cleaned_sentences = []
+                    for sentence in sentences:
+                        sentence = sentence.strip()
+                        if len(sentence) > 20:  # Solo frasi significative
+                            cleaned_sentences.append(sentence)
+                    content_text = '. '.join(cleaned_sentences)
+                    if content_text and not content_text.endswith('.'):
+                        content_text += '.'
+                    
+                    if len(content_text) > 150:
+                        logger.info(f"✅ Contenuto Fandom estratto: {len(content_text)} caratteri")
+                        return content_text[:3000]  # Aumentato a 3000 caratteri per più accuratezza
                 else:
                     logger.warning(f"Contenuto Fandom troppo corto: {len(content_text)} caratteri")
                     # Prova la prossima variante
@@ -182,7 +284,7 @@ def scrape_fandom_page(fandom_name: str, character_name: str) -> Optional[str]:
             continue  # Prova la prossima variante
     
     # Se nessuna variante ha funzionato
-    logger.warning(f"Nessuna variante del nome ha funzionato per {character_name} su {fandom_name}.fandom.com")
+    logger.warning(f"Nessuna variante del nome ha funzionato per {page_name} su {fandom_name}.fandom.com")
     return None
 
 def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
@@ -197,13 +299,24 @@ def search_web_game_info(game_title: str, query: str = "") -> Optional[str]:
         if not entity_name:
             entity_name = game_title.strip()
         
-        # PRIMA PRIORITÀ: Prova Fandom
+        # PRIMA PRIORITÀ: Prova Fandom per GIOCHI
+        fandom_game_info = detect_fandom_game(entity_name, query)
+        if fandom_game_info:
+            fandom_name, formatted_game_name = fandom_game_info
+            logger.info(f"Rilevato gioco Fandom: {fandom_name} - {formatted_game_name}")
+            
+            fandom_content = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True)
+            if fandom_content:
+                logger.info(f"✅ Informazioni trovate su Fandom per gioco: {formatted_game_name}")
+                return fandom_content
+        
+        # SECONDA PRIORITÀ: Prova Fandom per PERSONAGGI
         fandom_info = detect_fandom_series(entity_name, query)
         if fandom_info:
             fandom_name, character_name = fandom_info
             logger.info(f"Rilevata serie Fandom: {fandom_name} per personaggio: {character_name}")
             
-            fandom_content = scrape_fandom_page(fandom_name, character_name)
+            fandom_content = scrape_fandom_page(fandom_name, character_name, is_game=False)
             if fandom_content:
                 logger.info(f"✅ Informazioni trovate su Fandom per {character_name}")
                 return fandom_content
