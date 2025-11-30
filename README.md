@@ -8,9 +8,11 @@ Sistema intelligente di raccomandazione giochi Nintendo basato su AI, con API RE
 - 💬 **Chat Interattiva**: Interfaccia conversazionale per scoprire giochi Nintendo
 - 📱 **App Flutter**: Applicazione mobile cross-platform (Android/iOS) con visualizzazione strutturata
 - 🔍 **Ricerca Intelligente**: Sistema RAG per informazioni dettagliate sui giochi
-- 🌐 **Ricerca Web Integrata**: Cerca automaticamente su internet giochi e personaggi non nel database
+- 🌐 **Integrazione Fandom**: Scraping diretto da wiki Fandom per informazioni accurate su giochi e personaggi
+- 🖼️ **Immagini Personaggi**: Estrazione automatica di immagini da Fandom per personaggi Nintendo
+- ⚡ **Risposte Veloci**: Modalità ottimizzata per messaggi colloquiali (small_talk) con tempi di risposta ridotti
 - 🎯 **42 Giochi Nintendo**: Database completo con tags e mood bilingue (IT/EN)
-- 👤 **Info Personaggi**: Supporto per domande su personaggi Nintendo (es. "chi è yoshi?")
+- 👤 **Info Personaggi**: Supporto completo per domande su personaggi Nintendo con immagini
 - 📊 **Card Informative**: Visualizzazione strutturata di informazioni giochi e personaggi nel frontend
 
 ## 🏗️ Architettura
@@ -116,8 +118,10 @@ Content-Type: application/json
 2. **Raccomandazione**: Confronta i tag estratti con il database di 42 giochi Nintendo
 3. **Matching Intelligente**: Trova il gioco con la migliore corrispondenza
 4. **Risposta Contestuale**: Se richiesto, recupera informazioni dettagliate dal sistema RAG
-5. **Ricerca Web**: Se un gioco o personaggio non è nel database, cerca automaticamente su internet
-6. **Visualizzazione Strutturata**: Le informazioni vengono mostrate in card colorate nel frontend
+5. **Integrazione Fandom**: Per giochi e personaggi, cerca automaticamente su Fandom per informazioni accurate
+6. **Estrazione Immagini**: Recupera immagini da Fandom per personaggi quando disponibili
+7. **Modalità Ottimizzata**: Usa parametri veloci per messaggi colloquiali (small_talk) per risposte rapide
+8. **Visualizzazione Strutturata**: Le informazioni vengono mostrate in card colorate nel frontend con immagini
 
 ## 🗄️ Database Giochi
 
@@ -166,7 +170,7 @@ static const String baseUrl = 'http://localhost:8000';
 - **`app/ai_engine_ollama.py`**: Integrazione con Ollama e pulizia markdown
 - **`app/services/recommender_service.py`**: Logica di raccomandazione
 - **`app/services/info_service.py`**: Sistema RAG per info giochi
-- **`app/services/web_search_service.py`**: Ricerca web per giochi/personaggi non nel DB
+- **`app/services/web_search_service.py`**: Scraping Fandom e ricerca web per giochi/personaggi non nel DB
 - **`app/knowledge/rag_engine.py`**: Motore di ricerca semantica
 - **`app/db/nintendo_games.json`**: Database giochi con tags/mood
 - **`app/knowledge/game_details.json`**: Dettagli completi giochi
@@ -203,12 +207,54 @@ ollama pull qwen3:8b
 ollama list
 ```
 
-## 🌐 Ricerca Web
+## 🌐 Integrazione Fandom
 
-Il sistema include ricerca web automatica per:
-- **Giochi non nel database**: Cerca informazioni su giochi Nintendo non presenti localmente
-- **Personaggi**: Supporta domande su personaggi Nintendo (es. "chi è yoshi?", "cos'è link?")
-- **Info generali**: Fornisce data di uscita, piattaforme, sviluppatore, descrizione generale
+Il sistema include scraping diretto da wiki Fandom per informazioni accurate e aggiornate:
+
+### Serie Supportate
+
+**Giochi e Personaggi:**
+- 🎮 **Ace Attorney** → `aceattorney.fandom.com`
+- 🗡️ **The Legend of Zelda** → `zelda.fandom.com`
+- 🍄 **Super Mario** → `mario.fandom.com`
+- ⚡ **Pokémon** → `pokemon.fandom.com`
+- 👾 **Metroid** → `metroid.fandom.com`
+- ⚔️ **Fire Emblem** → `fireemblem.fandom.com`
+- 🌌 **Xenoblade Chronicles** → `xenoblade.fandom.com`
+- ⭐ **Kirby** → `kirby.fandom.com`
+- 🦍 **Donkey Kong** → `donkeykong.fandom.com`
+- 🏝️ **Animal Crossing** → `animalcrossing.fandom.com`
+- 🦊 **Star Fox** → `starfox.fandom.com`
+- 🏎️ **F-Zero** → `fzero.fandom.com`
+- 🥚 **Yoshi** → `yoshi.fandom.com`
+- 💰 **Wario** → `wario.fandom.com`
+- 🌱 **Pikmin** → `pikmin.fandom.com`
+- 🎨 **Splatoon** → `splatoon.fandom.com`
+- 🏛️ **Kid Icarus** → `kidicarus.fandom.com`
+- 🎮 **Game & Watch** → `gameandwatch.fandom.com`
+- 🥊 **Punch-Out!!** → `punch-out.fandom.com`
+- 🎵 **Rhythm Heaven** → `rhythmheaven.fandom.com`
+- 🎭 **Persona / Shin Megami Tensei** → `megamitensei.fandom.com`
+
+**Console Nintendo:**
+- 🎮 **Console Nintendo** → `nintendo.fandom.com` (Switch, Wii U, 3DS, DS, GameCube, N64, SNES, NES, Game Boy, ecc.)
+
+### Funzionalità
+
+- ✅ **Scraping Intelligente**: Estrae contenuto principale dalle pagine Fandom, rimuovendo elementi non necessari
+- ✅ **Estrazione Immagini**: Recupera automaticamente la prima immagine significativa del personaggio/gioco
+- ✅ **Rilevamento Automatico**: Riconosce automaticamente la serie dalla query (es. "chi è meta knight?" → Kirby)
+- ✅ **Nomi Composti**: Supporta nomi composti come "Meta Knight", "King Dedede", "Captain Falcon"
+- ✅ **Priorità Personaggi**: Rileva prima i personaggi, poi i giochi per evitare falsi positivi
+- ✅ **Fallback Intelligente**: Se Fandom non è disponibile, usa ricerca web tradizionale
+
+### Esempi di Query Supportate
+
+- "chi è Meta Knight?" → `https://kirby.fandom.com/wiki/Meta_Knight`
+- "mi parli di Godot da Ace Attorney?" → `https://aceattorney.fandom.com/wiki/Godot`
+- "Persona 5" → `https://megamitensei.fandom.com/wiki/Persona_5`
+- "Nintendo Switch" → `https://nintendo.fandom.com/wiki/Nintendo_Switch`
+- "chi è Tom Nook?" → `https://animalcrossing.fandom.com/wiki/Tom_Nook`
 
 **Limitazioni**: Il sistema fornisce solo informazioni generali sui giochi. Non risponde a:
 - Guide su come battere livelli
@@ -224,6 +270,10 @@ Il sistema include ricerca web automatica per:
 - Il database include giochi per Switch, Wii U, Wii, 3DS, DS
 - Le risposte vengono pulite automaticamente da formattazione markdown
 - Il frontend mostra card informative per giochi raccomandati e informazioni strutturate
+- **Nessun timeout**: Il sistema aspetta finché Ollama non risponde (anche se lento)
+- **Logging tempi**: Tutti i tempi di risposta vengono loggati nel terminale
+- **Modalità fast**: Messaggi colloquiali come "ciao" hanno risposte ottimizzate (5-10 sec invece di 30-40 sec)
+- **Immagini Fandom**: Le immagini dei personaggi vengono estratte automaticamente da Fandom quando disponibili
 
 ## 📄 Licenza
 
