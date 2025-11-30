@@ -260,11 +260,15 @@ Il sistema include scraping diretto da wiki Fandom per informazioni accurate e a
 
 ### Esempi di Query Supportate
 
-- "chi è Meta Knight?" → `https://kirby.fandom.com/wiki/Meta_Knight`
-- "mi parli di Godot da Ace Attorney?" → `https://aceattorney.fandom.com/wiki/Godot`
+- "chi è Meta Knight?" → `https://kirby.fandom.com/wiki/Meta_Knight` (15 paragrafi)
+- "approfondisci su Meta Knight" → Stessa pagina, tutto il contenuto
+- "mi parli di Godot da Ace Attorney?" → `https://aceattorney.fandom.com/wiki/Godot` (15 paragrafi)
+- "dimmi di più su Godot" → Stessa pagina, tutto il contenuto
 - "Persona 5" → `https://megamitensei.fandom.com/wiki/Persona_5`
 - "Nintendo Switch" → `https://nintendo.fandom.com/wiki/Nintendo_Switch`
 - "chi è Tom Nook?" → `https://animalcrossing.fandom.com/wiki/Tom_Nook`
+
+**Approfondimento**: Puoi chiedere "approfondisci", "dimmi di più", "altre info" per ottenere informazioni complete dalla stessa pagina Fandom.
 
 **Limitazioni**: Il sistema fornisce solo informazioni generali sui giochi. Non risponde a:
 - Guide su come battere livelli
