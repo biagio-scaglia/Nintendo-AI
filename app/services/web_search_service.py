@@ -69,6 +69,96 @@ def detect_fandom_game(game_name: str, query: str = "") -> Optional[Tuple[str, s
         formatted_name = format_game_name_for_fandom(game_name)
         return ("pokemon", formatted_name)
     
+    # Persona e Shin Megami Tensei games
+    persona_smt_game_keywords = [
+        "persona", "shin megami tensei", "megami tensei", "smt", "persona 3", "persona 4", "persona 5",
+        "persona 5 royal", "persona 4 golden", "nocturne", "shin megami tensei v", "smt v",
+        "shin megami tensei iii", "persona q", "persona q2"
+    ]
+    # Controlla anche se contiene "persona" o "shin megami tensei" o "smt" nel nome
+    if ("persona" in game_lower or "shin megami tensei" in game_lower or "megami tensei" in game_lower or 
+        ("smt" in game_lower and len(game_lower.split()) <= 3)):  # "smt" da solo o con poche parole
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("megamitensei", formatted_name)
+    if any(kw in combined for kw in persona_smt_game_keywords):
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("megamitensei", formatted_name)
+    
+    # Kirby games
+    if "kirby" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("kirby", formatted_name)
+    
+    # Donkey Kong games
+    if "donkey kong" in game_lower or "diddy kong" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("donkeykong", formatted_name)
+    
+    # Animal Crossing games
+    if "animal crossing" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("animalcrossing", formatted_name)
+    
+    # Star Fox games
+    if "star fox" in game_lower or "starfox" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("starfox", formatted_name)
+    
+    # F-Zero games
+    if "f-zero" in game_lower or "fzero" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("fzero", formatted_name)
+    
+    # Yoshi games
+    if "yoshi" in game_lower and "mario" not in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("yoshi", formatted_name)
+    
+    # Wario games
+    if "wario" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("wario", formatted_name)
+    
+    # Pikmin games
+    if "pikmin" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("pikmin", formatted_name)
+    
+    # Splatoon games
+    if "splatoon" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("splatoon", formatted_name)
+    
+    # Kid Icarus games
+    if "kid icarus" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("kidicarus", formatted_name)
+    
+    # Game & Watch
+    if "game & watch" in game_lower or "game and watch" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("gameandwatch", formatted_name)
+    
+    # Punch-Out!! games
+    if "punch-out" in game_lower or "punch out" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("punch-out", formatted_name)
+    
+    # Rhythm Heaven games
+    if "rhythm heaven" in game_lower:
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("rhythmheaven", formatted_name)
+    
+    # Nintendo consoles (nintendo.fandom.com)
+    nintendo_console_keywords = [
+        "nintendo switch", "nintendo switch 2", "nintendo switch lite", "nintendo switch oled",
+        "wii u", "wii", "nintendo 3ds", "nintendo ds", "gamecube", "nintendo 64", "n64",
+        "super nintendo", "snes", "nes", "game boy", "game boy advance", "game boy color"
+    ]
+    if any(kw in combined for kw in nintendo_console_keywords):
+        formatted_name = format_game_name_for_fandom(game_name)
+        return ("nintendo", formatted_name)
+    
     return None
 
 def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[str, str]]:
@@ -171,6 +261,169 @@ def detect_fandom_series(entity_name: str, query: str = "") -> Optional[Tuple[st
         char_name = entity_name.strip()
         char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
         return ("xenoblade", char_name)
+    
+    # Persona e Shin Megami Tensei
+    persona_smt_series_keywords = ["persona", "shin megami tensei", "megami tensei", "saga di persona", 
+                                   "da persona", "in persona", "smt", "shin megami"]
+    persona_smt_chars = [
+        "joker", "yu narukami", "makoto yuki", "aigis", "yukari", "mitsuru", "akihiko", "ken",
+        "yukiko", "chie", "rise", "naoto", "kanji", "teddie", "ann", "ryuji", "morgana",
+        "yusuke", "makoto", "haru", "futaba", "goro", "kasumi", "sumire", "demifiend",
+        "flynn", "nanashi", "nahobino", "minato", "kotone"
+    ]
+    if any(kw in query_lower for kw in persona_smt_series_keywords):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("megamitensei", char_name)
+    
+    if any(kw in combined for kw in persona_smt_chars):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("megamitensei", char_name)
+    
+    # Kirby
+    kirby_series_keywords = ["kirby", "saga di kirby", "da kirby"]
+    kirby_chars = ["kirby", "meta knight", "king dedede", "bandana waddle dee", "adeleine", "ribbon"]
+    # Mapping per nomi composti Kirby
+    kirby_full_names = {
+        "meta knight": "Meta Knight",
+        "king dedede": "King Dedede",
+        "bandana waddle dee": "Bandana Waddle Dee"
+    }
+    if any(kw in query_lower for kw in kirby_series_keywords) or any(kw in combined for kw in kirby_chars):
+        char_name = entity_name.strip().lower()
+        # Controlla se c'è un nome completo nel mapping
+        if char_name in kirby_full_names:
+            char_name = kirby_full_names[char_name]
+        else:
+            # Capitalizza ogni parola (title case)
+            char_name = entity_name.strip().title()
+        return ("kirby", char_name)
+    
+    # Donkey Kong
+    donkey_kong_series_keywords = ["donkey kong", "saga di donkey kong", "da donkey kong"]
+    donkey_kong_chars = ["donkey kong", "diddy kong", "dixie kong", "cranky kong", "funky kong", "k rool"]
+    donkey_kong_full_names = {
+        "donkey kong": "Donkey Kong",
+        "diddy kong": "Diddy Kong",
+        "dixie kong": "Dixie Kong",
+        "cranky kong": "Cranky Kong",
+        "funky kong": "Funky Kong",
+        "k rool": "King K. Rool"
+    }
+    if any(kw in query_lower for kw in donkey_kong_series_keywords) or any(kw in combined for kw in donkey_kong_chars):
+        char_name = entity_name.strip().lower()
+        if char_name in donkey_kong_full_names:
+            char_name = donkey_kong_full_names[char_name]
+        else:
+            char_name = entity_name.strip().title()
+        return ("donkeykong", char_name)
+    
+    # Animal Crossing
+    animal_crossing_series_keywords = ["animal crossing", "saga di animal crossing", "da animal crossing"]
+    animal_crossing_chars = ["tom nook", "isabelle", "k.k. slider", "blathers", "celeste", "flick", "cj"]
+    animal_crossing_full_names = {
+        "tom nook": "Tom Nook",
+        "k.k. slider": "K.K. Slider",
+        "k.k slider": "K.K. Slider"
+    }
+    if any(kw in query_lower for kw in animal_crossing_series_keywords) or any(kw in combined for kw in animal_crossing_chars):
+        char_name = entity_name.strip().lower()
+        if char_name in animal_crossing_full_names:
+            char_name = animal_crossing_full_names[char_name]
+        else:
+            char_name = entity_name.strip().title()
+        return ("animalcrossing", char_name)
+    
+    # Star Fox
+    star_fox_series_keywords = ["star fox", "starfox", "saga di star fox", "da star fox"]
+    star_fox_chars = ["fox", "falco", "peppy", "slippy", "wolf", "leon", "pigma", "andross"]
+    star_fox_full_names = {
+        "fox": "Fox McCloud",
+        "falco": "Falco Lombardi",
+        "peppy": "Peppy Hare",
+        "slippy": "Slippy Toad"
+    }
+    if any(kw in query_lower for kw in star_fox_series_keywords) or any(kw in combined for kw in star_fox_chars):
+        char_name = entity_name.strip().lower()
+        if char_name in star_fox_full_names:
+            char_name = star_fox_full_names[char_name]
+        else:
+            char_name = entity_name.strip().title()
+        return ("starfox", char_name)
+    
+    # F-Zero
+    fzero_series_keywords = ["f-zero", "fzero", "saga di f-zero", "da f-zero"]
+    fzero_chars = ["captain falcon", "samurai goroh", "pico", "black shadow"]
+    fzero_full_names = {
+        "captain falcon": "Captain Falcon",
+        "samurai goroh": "Samurai Goroh",
+        "black shadow": "Black Shadow"
+    }
+    if any(kw in query_lower for kw in fzero_series_keywords) or any(kw in combined for kw in fzero_chars):
+        char_name = entity_name.strip().lower()
+        if char_name in fzero_full_names:
+            char_name = fzero_full_names[char_name]
+        else:
+            char_name = entity_name.strip().title()
+        return ("fzero", char_name)
+    
+    # Yoshi (separato da Mario)
+    yoshi_series_keywords = ["yoshi", "saga di yoshi", "da yoshi"]
+    yoshi_chars = ["yoshi", "baby mario", "baby luigi", "poochy"]
+    if any(kw in query_lower for kw in yoshi_series_keywords) or any(kw in combined for kw in yoshi_chars):
+        # Solo se non è già rilevato come Mario
+        if "mario" not in query_lower and "mario" not in entity_lower:
+            char_name = entity_name.strip()
+            char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+            return ("yoshi", char_name)
+    
+    # Wario
+    wario_series_keywords = ["wario", "saga di wario", "da wario"]
+    wario_chars = ["wario", "waluigi", "captain syrup", "ashley"]
+    if any(kw in query_lower for kw in wario_series_keywords) or any(kw in combined for kw in wario_chars):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("wario", char_name)
+    
+    # Pikmin
+    pikmin_series_keywords = ["pikmin", "saga di pikmin", "da pikmin"]
+    pikmin_chars = ["olimar", "louie", "alph", "brittany", "charlie", "pikmin"]
+    if any(kw in query_lower for kw in pikmin_series_keywords) or any(kw in combined for kw in pikmin_chars):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("pikmin", char_name)
+    
+    # Splatoon
+    splatoon_series_keywords = ["splatoon", "saga di splatoon", "da splatoon"]
+    splatoon_chars = ["inkling", "octoling", "marie", "callie", "pearl", "marina", "agent 3", "agent 4", "agent 8"]
+    if any(kw in query_lower for kw in splatoon_series_keywords) or any(kw in combined for kw in splatoon_chars):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("splatoon", char_name)
+    
+    # Kid Icarus
+    kid_icarus_series_keywords = ["kid icarus", "saga di kid icarus", "da kid icarus"]
+    kid_icarus_chars = ["pit", "palutena", "medusa", "viridi", "hades", "dark pit"]
+    if any(kw in query_lower for kw in kid_icarus_series_keywords) or any(kw in combined for kw in kid_icarus_chars):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("kidicarus", char_name)
+    
+    # Punch-Out!!
+    punchout_series_keywords = ["punch-out", "punch out", "saga di punch-out", "da punch-out"]
+    punchout_chars = ["little mac", "doc louis", "mike tyson", "glass joe", "king hippo"]
+    if any(kw in query_lower for kw in punchout_series_keywords) or any(kw in combined for kw in punchout_chars):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("punch-out", char_name)
+    
+    # Rhythm Heaven
+    rhythm_heaven_series_keywords = ["rhythm heaven", "saga di rhythm heaven", "da rhythm heaven"]
+    if any(kw in query_lower for kw in rhythm_heaven_series_keywords):
+        char_name = entity_name.strip()
+        char_name = char_name[0].upper() + char_name[1:].lower() if len(char_name) > 1 else char_name.upper()
+        return ("rhythmheaven", char_name)
     
     return None
 
@@ -391,19 +644,7 @@ def search_web_game_info(game_title: str, query: str = "") -> tuple:
         if not entity_name:
             entity_name = game_title.strip()
         
-        # PRIMA PRIORITÀ: Prova Fandom per GIOCHI
-        fandom_game_info = detect_fandom_game(entity_name, query)
-        if fandom_game_info:
-            fandom_name, formatted_game_name = fandom_game_info
-            logger.info(f"Rilevato gioco Fandom: {fandom_name} - {formatted_game_name}")
-            
-            fandom_result = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True)
-            if fandom_result:
-                fandom_content, image_url = fandom_result
-                logger.info(f"✅ Informazioni trovate su Fandom per gioco: {formatted_game_name}")
-                return (fandom_content, image_url)
-        
-        # SECONDA PRIORITÀ: Prova Fandom per PERSONAGGI
+        # PRIMA PRIORITÀ: Prova Fandom per PERSONAGGI (prima dei giochi, per evitare falsi positivi)
         fandom_info = detect_fandom_series(entity_name, query)
         if fandom_info:
             fandom_name, character_name = fandom_info
@@ -413,6 +654,18 @@ def search_web_game_info(game_title: str, query: str = "") -> tuple:
             if fandom_result:
                 fandom_content, image_url = fandom_result
                 logger.info(f"✅ Informazioni trovate su Fandom per {character_name}")
+                return (fandom_content, image_url)
+        
+        # SECONDA PRIORITÀ: Prova Fandom per GIOCHI
+        fandom_game_info = detect_fandom_game(entity_name, query)
+        if fandom_game_info:
+            fandom_name, formatted_game_name = fandom_game_info
+            logger.info(f"Rilevato gioco Fandom: {fandom_name} - {formatted_game_name}")
+            
+            fandom_result = scrape_fandom_page(fandom_name, formatted_game_name, is_game=True)
+            if fandom_result:
+                fandom_content, image_url = fandom_result
+                logger.info(f"✅ Informazioni trovate su Fandom per gioco: {formatted_game_name}")
                 return (fandom_content, image_url)
         
         # FALLBACK: Se Fandom non funziona, usa DuckDuckGo/Google
@@ -543,17 +796,22 @@ def extract_entity_name(query: str) -> str:
             parts = query_lower.split(phrase, 1)
             if len(parts) > 1:
                 entity = parts[1].strip()
-                # Rimuovi eventuali frasi successive come "in ace attorney", "della saga", ecc.
-                # Prendi solo la prima parte (il nome del personaggio)
+                # Rimuovi eventuali frasi successive come "in ace attorney", "della saga", "da kirby", ecc.
+                # Prendi tutto fino a queste frasi (per mantenere nomi composti come "meta knight")
                 entity = entity.split(" in ")[0].split(" della ")[0].split(" da ")[0].split(" di ")[0]
                 # Rimuovi punteggiatura finale
                 entity = entity.rstrip("?.,!;:")
-                return entity.strip()
+                entity = entity.strip()
+                # Se l'entità ha più parole, restituiscila tutta (per nomi composti)
+                if entity:
+                    return entity
     
-    # Se non trova frasi, prova a estrarre la prima parola significativa
+    # Se non trova frasi, prova a estrarre le prime parole (fino a 3 per nomi composti)
     words = query_lower.split()
     if words:
-        return words[0].rstrip("?.,!;:")
+        # Prendi fino a 3 parole per supportare nomi composti come "meta knight", "king dedede"
+        entity = " ".join(words[:3]).rstrip("?.,!;:")
+        return entity.strip()
     
     return query_lower
 

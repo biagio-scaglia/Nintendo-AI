@@ -5,7 +5,7 @@ from app.ai_engine_ollama import chat_nintendo_ai
 from app.utils import validate_history, format_for_engine, classify_intent
 from app.services.recommender_service import load_games, filter_by_platform, smart_recommend, get_similar_games
 from app.services.info_service import get_game_info, search_game_info, get_context_for_ai
-from app.services.web_search_service import get_web_context, get_web_game_info, get_web_image_url, extract_entity_name
+from app.services.web_search_service import get_web_context, get_web_game_info, get_web_image_url, extract_entity_name, detect_fandom_series
 import uvicorn
 import logging
 import re
@@ -126,31 +126,34 @@ async def chat_endpoint(payload: ChatRequest):
             if is_character_query:
                 # Per personaggi, vai direttamente a web (non cercare nel database giochi)
                 logger.info(f"Character query detected, searching web for: {last_user_message}")
+                game_info = None  # Inizializza prima del try
                 try:
                     # Passa l'intera query come additional_query per mantenere il contesto (es. "in ace attorney")
                     web_context = get_web_context(last_user_message, last_user_message)
                     if web_context:
                         context = web_context
                         # Crea GameInfo SOLO se c'è un'immagine da mostrare
-                        image_url = get_web_image_url(last_user_message, last_user_message)
-                        # Filtra immagini placeholder o base64 vuote
-                        if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
-                            # Crea GameInfo minimale solo con immagine per il frontend
-                            entity_name = extract_entity_name(last_user_message)
-                            if not entity_name:
-                                entity_name = last_user_message.strip()
-                            game_info = GameInfo(
-                                title=entity_name.title(),
-                                platform="Nintendo",
-                                description="",
-                                gameplay="",
-                                difficulty="N/A",
-                                modes=[],
-                                keywords=[],
-                                image_url=image_url
-                            )
-                            logger.info(f"Created GameInfo with image for character: {entity_name}")
-                        else:
+                        try:
+                            image_url = get_web_image_url(last_user_message, last_user_message)
+                            # Filtra immagini placeholder o base64 vuote
+                            if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
+                                # Crea GameInfo minimale solo con immagine per il frontend
+                                entity_name = extract_entity_name(last_user_message)
+                                if not entity_name:
+                                    entity_name = last_user_message.strip()
+                                game_info = GameInfo(
+                                    title=entity_name.title(),
+                                    platform="Nintendo",
+                                    description="",
+                                    gameplay="",
+                                    difficulty="N/A",
+                                    modes=[],
+                                    keywords=[],
+                                    image_url=image_url
+                                )
+                                logger.info(f"Created GameInfo with image for character: {entity_name}")
+                        except Exception as img_error:
+                            logger.warning(f"Error getting image URL: {img_error}")
                             game_info = None
                     else:
                         game_info = None
@@ -187,24 +190,49 @@ async def chat_endpoint(payload: ChatRequest):
                         if web_context:
                             context = web_context
                 
-                # Crea GameInfo strutturato da web per il frontend (solo se non già presente, se abbiamo web_context E se NON è un personaggio)
+                # Crea GameInfo strutturato da web per il frontend
                 # Verifica se è un personaggio controllando se detect_fandom_series trova qualcosa
-                from app.services.web_search_service import detect_fandom_series, extract_entity_name
-                entity_name = extract_entity_name(last_user_message)
-                is_character = detect_fandom_series(entity_name, last_user_message) is not None
+                try:
+                    entity_name = extract_entity_name(last_user_message)
+                    if not entity_name:
+                        entity_name = last_user_message.strip()
+                    is_character = detect_fandom_series(entity_name, last_user_message) is not None
+                except Exception as e:
+                    logger.warning(f"Error detecting character: {e}")
+                    entity_name = last_user_message.strip()
+                    is_character = False
                 
-                if not game_info and web_context and not is_character:
-                    web_game_info = get_web_game_info(last_user_message, "")
-                    if web_game_info:
+                if not game_info and web_context:
+                    if is_character:
+                        # È un personaggio - crea GameInfo con immagine se disponibile
                         try:
-                            game_info = GameInfo(**web_game_info)
-                            logger.info(f"Created GameInfo from web for game query")
-                        except Exception as e:
-                            logger.warning(f"Failed to create GameInfo from web: {e}")
-                elif is_character:
-                    # È un personaggio, non creare la card
-                    game_info = None
-                    logger.info(f"Personaggio rilevato, non creo GameInfo card")
+                            image_url = get_web_image_url(last_user_message, last_user_message)
+                            if image_url and not image_url.startswith('data:image') and len(image_url) > 20:
+                                game_info = GameInfo(
+                                    title=entity_name.title(),
+                                    platform="Nintendo",
+                                    description="",
+                                    gameplay="",
+                                    difficulty="N/A",
+                                    modes=[],
+                                    keywords=[],
+                                    image_url=image_url
+                                )
+                                logger.info(f"Created GameInfo with image for character: {entity_name}")
+                            else:
+                                game_info = None
+                        except Exception as img_error:
+                            logger.warning(f"Error getting image for character: {img_error}")
+                            game_info = None
+                    else:
+                        # È un gioco - crea GameInfo completo
+                        web_game_info = get_web_game_info(last_user_message, "")
+                        if web_game_info:
+                            try:
+                                game_info = GameInfo(**web_game_info)
+                                logger.info(f"Created GameInfo from web for game query")
+                            except Exception as e:
+                                logger.warning(f"Failed to create GameInfo from web: {e}")
         
         # Se è una richiesta di raccomandazione, trova il gioco PRIMA di generare la risposta
         elif intent == "recommendation_request":
