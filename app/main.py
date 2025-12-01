@@ -6,6 +6,7 @@ from app.utils import validate_history, format_for_engine, classify_intent
 from app.services.recommender_service import load_games, filter_by_platform, smart_recommend, get_similar_games
 from app.services.info_service import get_game_info, search_game_info, get_context_for_ai
 from app.services.web_search_service import get_web_context, get_web_game_info, get_web_image_url, extract_entity_name, detect_fandom_series
+from app.services.user_memory_service import update_memory_from_conversation, get_personalization_context, load_memory, clear_memory
 import uvicorn
 import logging
 import re
@@ -86,7 +87,9 @@ async def root():
             "/chat": "POST - Chat with Nintendo Game Advisor",
             "/game/info": "POST - Get game information",
             "/games/list": "GET - List all games",
-            "/games/platform/{platform}": "GET - Games by platform"
+            "/games/platform/{platform}": "GET - Games by platform",
+            "/memory": "GET - Get saved user memory",
+            "/memory/clear": "POST - Clear user memory"
         }
     }
 
@@ -351,6 +354,14 @@ Mood: {', '.join(recommended.get('mood', []))}
 - Sii entusiasta, specifico e coinvolgente
 - Se l'utente non ha specificato la console, chiedigliela per essere più preciso"""
         
+        # Aggiungi contesto di personalizzazione dalla memoria
+        personalization_context = get_personalization_context()
+        if personalization_context:
+            if context:
+                context = context + "\n\n" + personalization_context
+            else:
+                context = personalization_context
+        
         formatted = format_for_engine(validated)
         
         try:
@@ -384,6 +395,27 @@ Mood: {', '.join(recommended.get('mood', []))}
         
         logger.info("Chat response generated successfully")
         logger.info(f"Returning response with info: {game_info is not None}, recommended_game: {recommended_game is not None}")
+        
+        # Salva informazioni nella memoria per personalizzazione futura
+        try:
+            game_info_dict = None
+            if game_info:
+                game_info_dict = game_info.model_dump() if hasattr(game_info, 'model_dump') else game_info.dict()
+            
+            recommended_game_dict = None
+            if recommended_game:
+                recommended_game_dict = recommended_game.model_dump() if hasattr(recommended_game, 'model_dump') else recommended_game.dict()
+            
+            update_memory_from_conversation(
+                user_message=last_user_message,
+                ai_response=reply,
+                game_info=game_info_dict,
+                recommended_game=recommended_game_dict
+            )
+            logger.info("Memory updated successfully")
+        except Exception as mem_error:
+            logger.warning(f"Error updating memory: {mem_error}")
+            # Non bloccare la risposta se c'è un errore nella memoria
         
         return ChatResponse(reply=reply, recommended_game=recommended_game, info=game_info)
     
@@ -426,6 +458,26 @@ async def game_info_endpoint(payload: GameInfoRequest):
     except Exception as e:
         logger.error(f"Error getting game info: {str(e)}", exc_info=True)
         return GameInfoResponse(game=None)
+
+@app.get("/memory")
+async def get_memory():
+    """Restituisce la memoria salvata dell'utente"""
+    try:
+        memory = load_memory()
+        return memory
+    except Exception as e:
+        logger.error(f"Error getting memory: {str(e)}", exc_info=True)
+        return {"error": "Failed to load memory"}
+
+@app.post("/memory/clear")
+async def clear_user_memory():
+    """Cancella tutta la memoria dell'utente"""
+    try:
+        clear_memory()
+        return {"message": "Memory cleared successfully"}
+    except Exception as e:
+        logger.error(f"Error clearing memory: {str(e)}", exc_info=True)
+        return {"error": "Failed to clear memory"}
 
 if __name__ == "__main__":
     uvicorn.run(
