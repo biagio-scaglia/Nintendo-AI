@@ -259,12 +259,89 @@ class WikiAgent:
                 "matched_page": page_data["title"],
                 "summary": page_data["summary"],
                 "relevant_section": relevant_section,
-                "full_text": page_data["full_text"]
+                "full_text": page_data["full_text"],
+                "language": self.lang
             }
             
         except Exception as e:
             logger.error(f"Error answering question '{question}': {e}")
             return {"error": "no_results"}
+    
+    def answer_multilang(self, question: str) -> Dict:
+        """
+        Answer a natural language question using both Italian and English Wikipedia.
+        Combines results from both languages and marks which language each result is from.
+        The AI will automatically translate English content to Italian.
+        
+        Args:
+            question: Natural language question
+            
+        Returns:
+            Dictionary with:
+                - matched_page: Page title (from best result)
+                - summary: Combined summary from both languages
+                - relevant_section: Most relevant section (if found)
+                - full_text: Combined full text from both languages
+                - it_result: Italian Wikipedia result (if found)
+                - en_result: English Wikipedia result (if found)
+            Or error dict if no results from either language
+        """
+        try:
+            # Try Italian first (primary language)
+            it_agent = WikiAgent(lang="it")
+            it_result = it_agent.answer(question)
+            
+            # Try English as well
+            en_agent = WikiAgent(lang="en")
+            en_result = en_agent.answer(question)
+            
+            # Combine results
+            combined_result = {
+                "it_result": it_result if "error" not in it_result else None,
+                "en_result": en_result if "error" not in en_result else None
+            }
+            
+            # If we have results from both languages
+            if combined_result["it_result"] and combined_result["en_result"]:
+                logger.info(f"Found results in both Italian and English Wikipedia")
+                # Use Italian as primary, but include English as additional context
+                combined_result.update({
+                    "matched_page": it_result.get("matched_page", ""),
+                    "summary": it_result.get("summary", ""),
+                    "relevant_section": it_result.get("relevant_section"),
+                    "full_text": it_result.get("full_text", ""),
+                    "language": "it+en"
+                })
+                # Add English content as additional context
+                en_summary = en_result.get("summary", "")
+                en_text = en_result.get("full_text", "")
+                if en_text:
+                    # Limit English text to avoid overwhelming the context
+                    en_text_limited = en_text[:2000] if len(en_text) > 2000 else en_text
+                    combined_result["full_text"] += f"\n\n--- INFORMAZIONI AGGIUNTIVE DA WIKIPEDIA INGLESE ---\n\n{en_text_limited}"
+                    if en_summary:
+                        combined_result["summary"] += f"\n\n(Informazioni aggiuntive disponibili anche in inglese)"
+            elif combined_result["it_result"]:
+                logger.info(f"Found results only in Italian Wikipedia")
+                combined_result.update(it_result)
+                combined_result["language"] = "it"
+            elif combined_result["en_result"]:
+                logger.info(f"Found results only in English Wikipedia")
+                combined_result.update(en_result)
+                combined_result["language"] = "en"
+            else:
+                logger.warning(f"No results found in either Italian or English Wikipedia for: {question}")
+                return {"error": "no_results"}
+            
+            return combined_result
+            
+        except Exception as e:
+            logger.error(f"Error in multilang answer for question '{question}': {e}")
+            # Fallback to single language
+            try:
+                return self.answer(question)
+            except:
+                return {"error": "no_results"}
 
 
 # Convenience function for quick access

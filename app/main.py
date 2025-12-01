@@ -193,10 +193,16 @@ async def chat_endpoint(payload: ChatRequest):
                         else:
                             # Ultimo fallback: Wikipedia
                             try:
-                                logger.info(f"Trying Wikipedia for small talk query: {last_user_message}")
-                                wiki_answer = wiki_agent.answer(last_user_message)
+                                logger.info(f"Trying Wikipedia (multilang) for small talk query: {last_user_message}")
+                                wiki_answer = wiki_agent.answer_multilang(last_user_message)
                                 if "error" not in wiki_answer:
-                                    wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+                                    lang_info = ""
+                                    if wiki_answer.get('language') == "it+en":
+                                        lang_info = " (combinato da Wikipedia italiana e inglese)"
+                                    elif wiki_answer.get('language') == "en":
+                                        lang_info = " (da Wikipedia inglese - traduci in italiano)"
+                                    
+                                    wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA{lang_info}:
 
 Pagina: {wiki_answer.get('matched_page', 'N/A')}
 Riassunto: {wiki_answer.get('summary', '')}
@@ -210,8 +216,12 @@ Riassunto: {wiki_answer.get('summary', '')}
                                         if len(full_text) > 2000:
                                             wiki_context += "\n\n[... contenuto troncato ...]"
                                     
+                                    # Aggiungi istruzione per traduzione se c'è contenuto inglese
+                                    if wiki_answer.get('language') == "en" or wiki_answer.get('language') == "it+en":
+                                        wiki_context += "\n\n⚠️ ISTRUZIONE IMPORTANTE:\n- Se ci sono informazioni in inglese, traduci tutto in italiano in modo naturale e fluido\n- Mantieni la struttura e i dettagli, ma adatta il linguaggio all'italiano\n- Combina le informazioni da entrambe le lingue se disponibili"
+                                    
                                     context = wiki_context
-                                    logger.info(f"✅ Informazioni trovate su Wikipedia per small talk")
+                                    logger.info(f"✅ Informazioni trovate su Wikipedia (multilang) per small talk")
                             except Exception as wiki_error:
                                 logger.warning(f"Wikipedia search failed for small talk: {wiki_error}")
                 except Exception as e:
@@ -286,10 +296,16 @@ Riassunto: {wiki_answer.get('summary', '')}
                 # Fallback: Prova Wikipedia se Fandom non ha trovato nulla
                 if not context:
                     try:
-                        logger.info(f"Fandom non ha trovato risultati, provo Wikipedia per: {last_user_message}")
-                        wiki_answer = wiki_agent.answer(last_user_message)
+                        logger.info(f"Fandom non ha trovato risultati, provo Wikipedia (multilang) per: {last_user_message}")
+                        wiki_answer = wiki_agent.answer_multilang(last_user_message)
                         if "error" not in wiki_answer:
-                            wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+                            lang_info = ""
+                            if wiki_answer.get('language') == "it+en":
+                                lang_info = " (combinato da Wikipedia italiana e inglese)"
+                            elif wiki_answer.get('language') == "en":
+                                lang_info = " (da Wikipedia inglese - traduci in italiano)"
+                            
+                            wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA{lang_info}:
 
 Pagina: {wiki_answer.get('matched_page', 'N/A')}
 Riassunto: {wiki_answer.get('summary', '')}
@@ -305,8 +321,12 @@ Riassunto: {wiki_answer.get('summary', '')}
                                 if len(full_text) > 2000:
                                     wiki_context += "\n\n[... contenuto troncato ...]"
                             
+                            # Aggiungi istruzione per traduzione se c'è contenuto inglese
+                            if wiki_answer.get('language') == "en" or wiki_answer.get('language') == "it+en":
+                                wiki_context += "\n\n⚠️ ISTRUZIONE IMPORTANTE:\n- Se ci sono informazioni in inglese, traduci tutto in italiano in modo naturale e fluido\n- Mantieni la struttura e i dettagli, ma adatta il linguaggio all'italiano\n- Combina le informazioni da entrambe le lingue se disponibili"
+                            
                             context = wiki_context
-                            logger.info(f"✅ Informazioni trovate su Wikipedia per: {last_user_message}")
+                            logger.info(f"✅ Informazioni trovate su Wikipedia (multilang) per: {last_user_message}")
                     except Exception as wiki_error:
                         logger.warning(f"Wikipedia search failed: {wiki_error}")
                         # Continua senza info web, l'AI userà la sua conoscenza
@@ -333,12 +353,18 @@ Riassunto: {wiki_answer.get('summary', '')}
                     # Se è una richiesta di approfondimento, aggiungi anche Wikipedia come fonte complementare
                     if deep_scrape:
                         try:
-                            logger.info(f"Richiesta approfondimento: aggiungo Wikipedia come fonte complementare")
-                            wiki_answer = wiki_agent.answer(last_user_message)
+                            logger.info(f"Richiesta approfondimento: aggiungo Wikipedia (multilang) come fonte complementare")
+                            wiki_answer = wiki_agent.answer_multilang(last_user_message)
                             if "error" not in wiki_answer:
+                                lang_info = ""
+                                if wiki_answer.get('language') == "it+en":
+                                    lang_info = " (combinato da Wikipedia italiana e inglese)"
+                                elif wiki_answer.get('language') == "en":
+                                    lang_info = " (da Wikipedia inglese - traduci in italiano)"
+                                
                                 wiki_complement = f"""
 
-📚 INFORMAZIONI COMPLEMENTARI DA WIKIPEDIA:
+📚 INFORMAZIONI COMPLEMENTARI DA WIKIPEDIA{lang_info}:
 
 Pagina: {wiki_answer.get('matched_page', 'N/A')}
 Riassunto: {wiki_answer.get('summary', '')}
@@ -353,8 +379,12 @@ Riassunto: {wiki_answer.get('summary', '')}
                                     if len(full_text) > 1500:
                                         wiki_complement += "\n\n[... contenuto troncato ...]"
                                 
+                                # Aggiungi istruzione per traduzione se c'è contenuto inglese
+                                if wiki_answer.get('language') == "en" or wiki_answer.get('language') == "it+en":
+                                    wiki_complement += "\n\n⚠️ ISTRUZIONE IMPORTANTE:\n- Se ci sono informazioni in inglese, traduci tutto in italiano in modo naturale e fluido\n- Combina le informazioni da entrambe le lingue se disponibili"
+                                
                                 context += wiki_complement
-                                logger.info(f"✅ Aggiunte informazioni complementari da Wikipedia")
+                                logger.info(f"✅ Aggiunte informazioni complementari da Wikipedia (multilang)")
                         except Exception as wiki_error:
                             logger.warning(f"Failed to get Wikipedia complement: {wiki_error}")
                     
@@ -378,10 +408,16 @@ Riassunto: {wiki_answer.get('summary', '')}
                     # Se ancora non trovato, prova Wikipedia prima della ricerca web tradizionale
                     if not context:
                         try:
-                            logger.info(f"Game not found in Fandom or local DB, trying Wikipedia for: {last_user_message}")
-                            wiki_answer = wiki_agent.answer(last_user_message)
+                            logger.info(f"Game not found in Fandom or local DB, trying Wikipedia (multilang) for: {last_user_message}")
+                            wiki_answer = wiki_agent.answer_multilang(last_user_message)
                             if "error" not in wiki_answer:
-                                wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+                                lang_info = ""
+                                if wiki_answer.get('language') == "it+en":
+                                    lang_info = " (combinato da Wikipedia italiana e inglese)"
+                                elif wiki_answer.get('language') == "en":
+                                    lang_info = " (da Wikipedia inglese - traduci in italiano)"
+                                
+                                wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA{lang_info}:
 
 Pagina: {wiki_answer.get('matched_page', 'N/A')}
 Riassunto: {wiki_answer.get('summary', '')}
@@ -396,8 +432,12 @@ Riassunto: {wiki_answer.get('summary', '')}
                                     if len(full_text) > 2000:
                                         wiki_context += "\n\n[... contenuto troncato ...]"
                                 
+                                # Aggiungi istruzione per traduzione se c'è contenuto inglese
+                                if wiki_answer.get('language') == "en" or wiki_answer.get('language') == "it+en":
+                                    wiki_context += "\n\n⚠️ ISTRUZIONE IMPORTANTE:\n- Se ci sono informazioni in inglese, traduci tutto in italiano in modo naturale e fluido\n- Mantieni la struttura e i dettagli, ma adatta il linguaggio all'italiano\n- Combina le informazioni da entrambe le lingue se disponibili"
+                                
                                 context = wiki_context
-                                logger.info(f"✅ Informazioni trovate su Wikipedia per gioco: {last_user_message}")
+                                logger.info(f"✅ Informazioni trovate su Wikipedia (multilang) per gioco: {last_user_message}")
                                 
                                 # Crea GameInfo anche da Wikipedia se possibile
                                 try:
@@ -867,7 +907,7 @@ async def wiki_answer(question_data: dict):
         if not question:
             return {"error": "Question cannot be empty"}
         
-        answer = wiki_agent.answer(question)
+        answer = wiki_agent.answer_multilang(question)
         return answer
     except Exception as e:
         logger.error(f"Error answering question: {str(e)}", exc_info=True)
