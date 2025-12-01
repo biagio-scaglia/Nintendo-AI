@@ -57,27 +57,53 @@ def extract_game_names(text: str) -> List[str]:
         "zelda", "mario", "pokemon", "metroid", "kirby", "donkey kong",
         "animal crossing", "splatoon", "fire emblem", "xenoblade",
         "super smash bros", "mario kart", "luigi's mansion", "paper mario",
-        "pikmin", "star fox", "f-zero", "earthbound", "mother"
+        "pikmin", "star fox", "f-zero", "earthbound", "mother",
+        "mario sports mix", "mario sports", "mario party", "mario tennis"
     ]
     
     text_lower = text.lower()
     found_games = []
     
-    for game in common_games:
+    # Cerca giochi comuni (match più lungo per primi)
+    sorted_games = sorted(common_games, key=len, reverse=True)
+    for game in sorted_games:
         if game in text_lower:
-            found_games.append(game.title())
+            # Estrai il nome completo dal testo originale mantenendo la capitalizzazione
+            pattern = re.compile(re.escape(game), re.IGNORECASE)
+            matches = pattern.finditer(text)
+            for match in matches:
+                start, end = match.span()
+                # Prova a estrarre il nome completo (parole vicine)
+                words = text[max(0, start-20):min(len(text), end+20)].split()
+                # Cerca pattern "Mario Sports Mix" o simili
+                game_name = text[max(0, start):min(len(text), end+30)].strip()
+                # Pulisci il nome
+                game_name = re.sub(r'^(salva|metti|aggiungi|segna)\s+', '', game_name, flags=re.IGNORECASE).strip()
+                if game_name and len(game_name) > 2:
+                    found_games.append(game_name)
     
-    # Cerca pattern come "gioco X" o "X game"
-    patterns = [
-        r'(?:gioco|game|titolo)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',
-        r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:è|sono|ha|game)'
+    # Cerca pattern come "salva X" o "X" dopo verbi di salvataggio
+    save_patterns = [
+        r'(?:salva|metti|aggiungi|segna)\s+([A-Z][a-zA-Z\s]+?)(?:\s+nei|\s+ai|\s+come|$)',
+        r'([A-Z][a-zA-Z\s]{3,}?)(?:\s+nei\s+preferiti|\s+ai\s+preferiti)',
     ]
     
-    for pattern in patterns:
+    for pattern in save_patterns:
         matches = re.findall(pattern, text)
-        found_games.extend([m.title() for m in matches if len(m) > 2])
+        for match in matches:
+            if match and len(match.strip()) > 2:
+                found_games.append(match.strip())
     
-    return list(set(found_games))
+    # Rimuovi duplicati mantenendo l'ordine
+    seen = set()
+    unique_games = []
+    for game in found_games:
+        game_lower = game.lower()
+        if game_lower not in seen:
+            seen.add(game_lower)
+            unique_games.append(game)
+    
+    return unique_games
 
 def extract_preferences_from_text(text: str) -> Dict:
     """Estrae preferenze dall'input dell'utente"""

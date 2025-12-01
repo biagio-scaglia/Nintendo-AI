@@ -413,16 +413,45 @@ Mood: {', '.join(recommended.get('mood', []))}
         if should_save_favorite:
             # Prova a salvare il gioco corrente
             game_to_save = None
+            game_name_to_save = None
+            
             if game_info:
                 game_to_save = game_info.model_dump() if hasattr(game_info, 'model_dump') else game_info.dict()
-                saved_to_favorites = save_to_favorites(game_info.title, game_to_save)
+                game_name_to_save = game_info.title
+                saved_to_favorites = save_to_favorites(game_name_to_save, game_to_save)
             elif recommended_game:
                 game_to_save = recommended_game.model_dump() if hasattr(recommended_game, 'model_dump') else recommended_game.dict()
-                saved_to_favorites = save_to_favorites(recommended_game.title, game_to_save)
+                game_name_to_save = recommended_game.title
+                saved_to_favorites = save_to_favorites(game_name_to_save, game_to_save)
+            else:
+                # Se non c'è game_info nel contesto, prova a estrarre il nome del gioco dal messaggio
+                # o cercarlo nella memoria recente
+                from app.services.user_memory_service import extract_game_names, load_memory
+                memory = load_memory()
+                
+                # Estrai nomi di giochi dal messaggio
+                games_in_message = extract_game_names(last_user_message)
+                
+                # Cerca anche nei giochi menzionati di recente o nelle info fornite
+                if not games_in_message and memory.get("provided_info"):
+                    # Prendi l'ultimo gioco di cui si sono chiesti info
+                    last_info = memory["provided_info"][-1]
+                    games_in_message = [last_info.get("title", "")]
+                
+                if games_in_message:
+                    game_name_to_save = games_in_message[0]
+                    # Cerca info del gioco nella memoria
+                    game_info_from_memory = None
+                    for info in memory.get("provided_info", []):
+                        if info.get("title", "").lower() == game_name_to_save.lower():
+                            game_info_from_memory = info
+                            break
+                    
+                    saved_to_favorites = save_to_favorites(game_name_to_save, game_info_from_memory)
             
             if saved_to_favorites:
                 # Aggiungi conferma alla risposta
-                game_name = game_info.title if game_info else (recommended_game.title if recommended_game else "questo gioco")
+                game_name = game_name_to_save or (game_info.title if game_info else (recommended_game.title if recommended_game else "questo gioco"))
                 reply = f"✅ Ho salvato '{game_name}' nei tuoi preferiti! Puoi vederlo nella sezione Profilo.\n\n{reply}"
             elif should_save_favorite:
                 # Se voleva salvare ma non c'è un gioco da salvare
