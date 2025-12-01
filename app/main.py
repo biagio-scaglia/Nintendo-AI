@@ -17,6 +17,7 @@ from app.services.user_memory_service import (
     get_user_profile,
     generate_personality_report
 )
+from app.tools.wiki_agent import WikiAgent
 import uvicorn
 import logging
 import re
@@ -38,6 +39,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Inizializza WikiAgent
+wiki_agent = WikiAgent(lang="it")
 
 def extract_tags_from_response(response: str) -> list:
     words = response.lower().split()
@@ -99,7 +103,13 @@ async def root():
             "/games/list": "GET - List all games",
             "/games/platform/{platform}": "GET - Games by platform",
             "/memory": "GET - Get saved user memory",
-            "/memory/clear": "POST - Clear user memory"
+            "/memory/clear": "POST - Clear user memory",
+            "/profile": "GET - Get user profile",
+            "/profile/name": "POST - Set user name",
+            "/profile/report": "GET - Generate personality report",
+            "/wiki/search": "POST - Search Wikipedia pages",
+            "/wiki/page": "POST - Get Wikipedia page content",
+            "/wiki/answer": "POST - Answer question using Wikipedia"
         }
     }
 
@@ -134,6 +144,40 @@ async def chat_endpoint(payload: ChatRequest):
         game_info = None
         recommended_game = None
         all_text = " ".join([m.get("content", "") for m in validated])
+        
+        # Per small_talk o domande generali, prova Wikipedia se sembra una domanda informativa
+        if intent == "small_talk":
+            # Rileva se è una domanda informativa generale (non su un gioco specifico)
+            general_info_keywords = [
+                "cos'è", "cosa è", "chi è", "quando", "dove", "perché", "come",
+                "storia di", "storia del", "storia della", "origine", "nascita",
+                "quando è nato", "quando è stato creato", "quando è uscito"
+            ]
+            is_general_info = any(keyword in last_user_message.lower() for keyword in general_info_keywords)
+            
+            if is_general_info and len(last_user_message.split()) > 3:  # Solo per domande abbastanza specifiche
+                try:
+                    logger.info(f"Small talk con domanda informativa, provo Wikipedia: {last_user_message}")
+                    wiki_answer = wiki_agent.answer(last_user_message)
+                    if "error" not in wiki_answer:
+                        wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+
+Pagina: {wiki_answer.get('matched_page', 'N/A')}
+Riassunto: {wiki_answer.get('summary', '')}
+"""
+                        if wiki_answer.get('relevant_section'):
+                            wiki_context += f"Sezione rilevante: {wiki_answer.get('relevant_section')}\n\n"
+                        
+                        full_text = wiki_answer.get('full_text', '')
+                        if full_text:
+                            wiki_context += f"Contenuto:\n{full_text[:1500]}"
+                            if len(full_text) > 1500:
+                                wiki_context += "\n\n[... contenuto troncato ...]"
+                        
+                        context = wiki_context
+                        logger.info(f"✅ Informazioni trovate su Wikipedia per small talk")
+                except Exception as wiki_error:
+                    logger.warning(f"Wikipedia search failed for small talk: {wiki_error}")
         
         # Se è una richiesta di informazioni, cerca il gioco specifico
         if intent == "info_request":
@@ -200,7 +244,34 @@ async def chat_endpoint(payload: ChatRequest):
                 except Exception as e:
                     logger.warning(f"Web search failed for character query: {e}")
                     game_info = None
-                    # Continua senza info web, l'AI userà la sua conoscenza
+                
+                # Fallback: Prova Wikipedia se Fandom non ha trovato nulla
+                if not context:
+                    try:
+                        logger.info(f"Fandom non ha trovato risultati, provo Wikipedia per: {last_user_message}")
+                        wiki_answer = wiki_agent.answer(last_user_message)
+                        if "error" not in wiki_answer:
+                            wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+
+Pagina: {wiki_answer.get('matched_page', 'N/A')}
+Riassunto: {wiki_answer.get('summary', '')}
+"""
+                            if wiki_answer.get('relevant_section'):
+                                wiki_context += f"Sezione rilevante: {wiki_answer.get('relevant_section')}\n\n"
+                            
+                            # Aggiungi testo completo (limitato per non appesantire)
+                            full_text = wiki_answer.get('full_text', '')
+                            if full_text:
+                                # Prendi i primi 2000 caratteri
+                                wiki_context += f"Contenuto completo:\n{full_text[:2000]}"
+                                if len(full_text) > 2000:
+                                    wiki_context += "\n\n[... contenuto troncato ...]"
+                            
+                            context = wiki_context
+                            logger.info(f"✅ Informazioni trovate su Wikipedia per: {last_user_message}")
+                    except Exception as wiki_error:
+                        logger.warning(f"Wikipedia search failed: {wiki_error}")
+                        # Continua senza info web, l'AI userà la sua conoscenza
             else:
                 # Per giochi, prova prima Fandom (più accurato), poi database locale
                 logger.info(f"Game query detected, trying Fandom first for: {last_user_message}")
@@ -220,9 +291,38 @@ async def chat_endpoint(payload: ChatRequest):
                 if web_context:
                     # Fandom ha trovato informazioni - usale come fonte principale
                     context = web_context
+                    
+                    # Se è una richiesta di approfondimento, aggiungi anche Wikipedia come fonte complementare
+                    if deep_scrape:
+                        try:
+                            logger.info(f"Richiesta approfondimento: aggiungo Wikipedia come fonte complementare")
+                            wiki_answer = wiki_agent.answer(last_user_message)
+                            if "error" not in wiki_answer:
+                                wiki_complement = f"""
+
+📚 INFORMAZIONI COMPLEMENTARI DA WIKIPEDIA:
+
+Pagina: {wiki_answer.get('matched_page', 'N/A')}
+Riassunto: {wiki_answer.get('summary', '')}
+"""
+                                if wiki_answer.get('relevant_section'):
+                                    wiki_complement += f"Sezione rilevante: {wiki_answer.get('relevant_section')}\n\n"
+                                
+                                full_text = wiki_answer.get('full_text', '')
+                                if full_text:
+                                    # Per approfondimenti, prendi una porzione più grande
+                                    wiki_complement += f"Contenuto aggiuntivo:\n{full_text[:1500]}"
+                                    if len(full_text) > 1500:
+                                        wiki_complement += "\n\n[... contenuto troncato ...]"
+                                
+                                context += wiki_complement
+                                logger.info(f"✅ Aggiunte informazioni complementari da Wikipedia")
+                        except Exception as wiki_error:
+                            logger.warning(f"Failed to get Wikipedia complement: {wiki_error}")
+                    
                     # Aggiungi istruzione per generare informazioni diverse
                     if deep_scrape:
-                        context += "\n\n⚠️ ISTRUZIONE IMPORTANTE PER APPROFONDIMENTO:\n- L'utente ha già ricevuto informazioni su questo argomento\n- DEVI fornire informazioni DIVERSE e COMPLEMENTARI rispetto a quelle già date\n- Evita di ripetere le stesse informazioni già fornite\n- Concentrati su aspetti nuovi, dettagli aggiuntivi, curiosità, o prospettive diverse\n- Sii specifico e dettagliato con nuove informazioni"
+                        context += "\n\n⚠️ ISTRUZIONE IMPORTANTE PER APPROFONDIMENTO:\n- L'utente ha già ricevuto informazioni su questo argomento\n- DEVI fornire informazioni DIVERSE e COMPLEMENTARI rispetto a quelle già date\n- Evita di ripetere le stesse informazioni già fornite\n- Concentrati su aspetti nuovi, dettagli aggiuntivi, curiosità, o prospettive diverse\n- Sii specifico e dettagliato con nuove informazioni\n- Combina le informazioni da Fandom e Wikipedia per una risposta completa"
                     logger.info(f"✅ Using Fandom as primary source for game info")
                 else:
                     # Fallback: cerca nel database locale
@@ -237,12 +337,54 @@ async def chat_endpoint(payload: ChatRequest):
                             except Exception as e:
                                 logger.warning(f"Failed to create GameInfo from local: {e}")
                     
-                    # Se ancora non trovato, prova ricerca web tradizionale
+                    # Se ancora non trovato, prova Wikipedia prima della ricerca web tradizionale
                     if not context:
-                        logger.info(f"Game not found in Fandom or local DB, trying traditional web search")
-                        web_context = get_web_context(last_user_message, "")
-                        if web_context:
-                            context = web_context
+                        try:
+                            logger.info(f"Game not found in Fandom or local DB, trying Wikipedia for: {last_user_message}")
+                            wiki_answer = wiki_agent.answer(last_user_message)
+                            if "error" not in wiki_answer:
+                                wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+
+Pagina: {wiki_answer.get('matched_page', 'N/A')}
+Riassunto: {wiki_answer.get('summary', '')}
+"""
+                                if wiki_answer.get('relevant_section'):
+                                    wiki_context += f"Sezione rilevante: {wiki_answer.get('relevant_section')}\n\n"
+                                
+                                # Aggiungi testo completo (limitato)
+                                full_text = wiki_answer.get('full_text', '')
+                                if full_text:
+                                    wiki_context += f"Contenuto completo:\n{full_text[:2000]}"
+                                    if len(full_text) > 2000:
+                                        wiki_context += "\n\n[... contenuto troncato ...]"
+                                
+                                context = wiki_context
+                                logger.info(f"✅ Informazioni trovate su Wikipedia per gioco: {last_user_message}")
+                                
+                                # Crea GameInfo anche da Wikipedia se possibile
+                                try:
+                                    wiki_game_info = {
+                                        "title": wiki_answer.get('matched_page', ''),
+                                        "platform": "Nintendo",
+                                        "description": wiki_answer.get('summary', '')[:400],
+                                        "gameplay": wiki_answer.get('full_text', '')[:1000],
+                                        "difficulty": "N/A",
+                                        "modes": [],
+                                        "keywords": []
+                                    }
+                                    game_info = GameInfo(**wiki_game_info)
+                                    logger.info(f"Created GameInfo from Wikipedia")
+                                except Exception as wiki_info_error:
+                                    logger.warning(f"Failed to create GameInfo from Wikipedia: {wiki_info_error}")
+                        except Exception as wiki_error:
+                            logger.warning(f"Wikipedia search failed: {wiki_error}")
+                        
+                        # Ultimo fallback: ricerca web tradizionale
+                        if not context:
+                            logger.info(f"Wikipedia non ha trovato risultati, trying traditional web search")
+                            web_context = get_web_context(last_user_message, "")
+                            if web_context:
+                                context = web_context
                 
                 # Crea GameInfo strutturato da web per il frontend
                 # Verifica se è un personaggio controllando se detect_fandom_series trova qualcosa
@@ -648,6 +790,48 @@ async def get_personality_report():
     except Exception as e:
         logger.error(f"Error generating report: {str(e)}", exc_info=True)
         return {"error": "Failed to generate report"}
+
+@app.post("/wiki/search")
+async def wiki_search(query_data: dict):
+    """Cerca pagine su Wikipedia"""
+    try:
+        query = query_data.get("query", "").strip()
+        if not query:
+            return {"error": "Query cannot be empty"}
+        
+        results = wiki_agent.search(query)
+        return {"results": results}
+    except Exception as e:
+        logger.error(f"Error searching Wikipedia: {str(e)}", exc_info=True)
+        return {"error": "Failed to search Wikipedia"}
+
+@app.post("/wiki/page")
+async def wiki_page(title_data: dict):
+    """Ottieni una pagina Wikipedia completa"""
+    try:
+        title = title_data.get("title", "").strip()
+        if not title:
+            return {"error": "Title cannot be empty"}
+        
+        page_data = wiki_agent.get_page(title)
+        return page_data
+    except Exception as e:
+        logger.error(f"Error getting Wikipedia page: {str(e)}", exc_info=True)
+        return {"error": "Failed to get Wikipedia page"}
+
+@app.post("/wiki/answer")
+async def wiki_answer(question_data: dict):
+    """Rispondi a una domanda usando Wikipedia"""
+    try:
+        question = question_data.get("question", "").strip()
+        if not question:
+            return {"error": "Question cannot be empty"}
+        
+        answer = wiki_agent.answer(question)
+        return answer
+    except Exception as e:
+        logger.error(f"Error answering question: {str(e)}", exc_info=True)
+        return {"error": "Failed to answer question"}
 
 if __name__ == "__main__":
     uvicorn.run(
