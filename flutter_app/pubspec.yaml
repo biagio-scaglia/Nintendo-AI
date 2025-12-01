@@ -49,6 +49,9 @@ dependencies:
   
   # Markdown support
   flutter_markdown: ^0.6.18
+  
+  # Radix UI icons
+  radix_icons: ^1.0.1
 
 dev_dependencies:
   flutter_test:
