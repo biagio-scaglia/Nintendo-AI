@@ -147,37 +147,75 @@ async def chat_endpoint(payload: ChatRequest):
         
         # Per small_talk o domande generali, prova Wikipedia se sembra una domanda informativa
         if intent == "small_talk":
-            # Rileva se è una domanda informativa generale (non su un gioco specifico)
-            general_info_keywords = [
+            # Rileva se è una domanda informativa (può essere su giochi o personaggi)
+            info_keywords = [
                 "cos'è", "cosa è", "chi è", "quando", "dove", "perché", "come",
                 "storia di", "storia del", "storia della", "origine", "nascita",
-                "quando è nato", "quando è stato creato", "quando è uscito"
+                "quando è nato", "quando è stato creato", "quando è uscito",
+                "mi parli di", "parlami di", "dimmi di", "raccontami di"
             ]
-            is_general_info = any(keyword in last_user_message.lower() for keyword in general_info_keywords)
+            is_info_query = any(keyword in last_user_message.lower() for keyword in info_keywords)
             
-            if is_general_info and len(last_user_message.split()) > 3:  # Solo per domande abbastanza specifiche
+            if is_info_query and len(last_user_message.split()) > 3:  # Solo per domande abbastanza specifiche
+                # Prova prima a cercare come gioco (Fandom o database locale)
+                logger.info(f"Small talk con domanda informativa, provo ricerca gioco: {last_user_message}")
+                
+                # Prova Fandom prima
                 try:
-                    logger.info(f"Small talk con domanda informativa, provo Wikipedia: {last_user_message}")
-                    wiki_answer = wiki_agent.answer(last_user_message)
-                    if "error" not in wiki_answer:
-                        wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
+                    deep_scrape = False
+                    web_context = get_web_context(last_user_message, "", deep_scrape=deep_scrape)
+                    if web_context:
+                        context = web_context
+                        logger.info(f"✅ Informazioni trovate su Fandom per small talk")
+                        
+                        # Crea GameInfo se è un gioco
+                        web_game_info = get_web_game_info(last_user_message, "")
+                        if web_game_info:
+                            try:
+                                game_info = GameInfo(**web_game_info)
+                                logger.info(f"Created GameInfo from web for small talk query")
+                            except Exception as e:
+                                logger.warning(f"Failed to create GameInfo from web: {e}")
+                    else:
+                        # Fallback: database locale
+                        local_context = get_context_for_ai(last_user_message)
+                        if local_context:
+                            context = local_context
+                            logger.info(f"✅ Informazioni trovate nel database locale per small talk")
+                            search_results = search_game_info(last_user_message, top_k=1)
+                            if search_results:
+                                try:
+                                    game_info_data = search_results[0]
+                                    game_info = GameInfo(**game_info_data)
+                                    logger.info(f"Found game info in local database for small talk")
+                                except Exception as e:
+                                    logger.warning(f"Failed to create GameInfo from local: {e}")
+                        else:
+                            # Ultimo fallback: Wikipedia
+                            try:
+                                logger.info(f"Trying Wikipedia for small talk query: {last_user_message}")
+                                wiki_answer = wiki_agent.answer(last_user_message)
+                                if "error" not in wiki_answer:
+                                    wiki_context = f"""📚 INFORMAZIONI DA WIKIPEDIA:
 
 Pagina: {wiki_answer.get('matched_page', 'N/A')}
 Riassunto: {wiki_answer.get('summary', '')}
 """
-                        if wiki_answer.get('relevant_section'):
-                            wiki_context += f"Sezione rilevante: {wiki_answer.get('relevant_section')}\n\n"
-                        
-                        full_text = wiki_answer.get('full_text', '')
-                        if full_text:
-                            wiki_context += f"Contenuto:\n{full_text[:1500]}"
-                            if len(full_text) > 1500:
-                                wiki_context += "\n\n[... contenuto troncato ...]"
-                        
-                        context = wiki_context
-                        logger.info(f"✅ Informazioni trovate su Wikipedia per small talk")
-                except Exception as wiki_error:
-                    logger.warning(f"Wikipedia search failed for small talk: {wiki_error}")
+                                    if wiki_answer.get('relevant_section'):
+                                        wiki_context += f"Sezione rilevante: {wiki_answer.get('relevant_section')}\n\n"
+                                    
+                                    full_text = wiki_answer.get('full_text', '')
+                                    if full_text:
+                                        wiki_context += f"Contenuto:\n{full_text[:2000]}"
+                                        if len(full_text) > 2000:
+                                            wiki_context += "\n\n[... contenuto troncato ...]"
+                                    
+                                    context = wiki_context
+                                    logger.info(f"✅ Informazioni trovate su Wikipedia per small talk")
+                            except Exception as wiki_error:
+                                logger.warning(f"Wikipedia search failed for small talk: {wiki_error}")
+                except Exception as e:
+                    logger.warning(f"Error searching for game info in small talk: {e}")
         
         # Se è una richiesta di informazioni, cerca il gioco specifico
         if intent == "info_request":
@@ -555,26 +593,28 @@ Mood: {', '.join(recommended.get('mood', []))}
                 start_time = time.time()
                 logger.info("⏱️  Inizio generazione risposta AI...")
                 # Per small_talk, usa parametri più veloci (risposte più brevi)
-                is_small_talk = intent == "small_talk"
+                # MA solo se non abbiamo trovato contesto (vero small talk)
+                # Se abbiamo contesto, significa che è una richiesta informativa e serve risposta completa
+                is_small_talk = intent == "small_talk" and not context
                 reply = chat_nintendo_ai(formatted, context=context, fast_mode=is_small_talk)
-            elapsed_time = time.time() - start_time
-            logger.info(f"⏱️  Tempo totale per generare la risposta: {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
-            
-            # Se la risposta è vuota, usa un messaggio di fallback
-            if not reply or len(reply.strip()) == 0:
-                logger.warning("⚠️ Risposta vuota ricevuta da Ollama, uso messaggio di fallback")
-                if intent == "small_talk":
-                    reply = "Ciao! Sono qui per aiutarti con i giochi Nintendo! 🎮 Come posso aiutarti oggi?"
-                elif intent == "recommendation_request":
-                    reply = "Mi dispiace, non sono riuscito a generare una raccomandazione. Potresti provare a descrivere meglio il tipo di gioco che cerchi?"
-                elif intent == "info_request":
-                    reply = "Mi dispiace, non sono riuscito a recuperare le informazioni richieste. Potresti riprovare con una domanda più specifica?"
-                else:
-                    reply = "Mi dispiace, c'è stato un problema nella generazione della risposta. Potresti riprovare?"
-        except Exception as e:
-            elapsed_time = time.time() - start_time if 'start_time' in locals() else 0
-            logger.error(f"Error in AI response generation dopo {elapsed_time:.2f} secondi: {e}")
-            reply = "Mi dispiace, c'è stato un errore nella generazione della risposta. Puoi riprovare con una domanda diversa sui giochi Nintendo?"
+                elapsed_time = time.time() - start_time
+                logger.info(f"⏱️  Tempo totale per generare la risposta: {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
+                
+                # Se la risposta è vuota, usa un messaggio di fallback
+                if not reply or len(reply.strip()) == 0:
+                    logger.warning("⚠️ Risposta vuota ricevuta da Ollama, uso messaggio di fallback")
+                    if intent == "small_talk":
+                        reply = "Ciao! Sono qui per aiutarti con i giochi Nintendo! 🎮 Come posso aiutarti oggi?"
+                    elif intent == "recommendation_request":
+                        reply = "Mi dispiace, non sono riuscito a generare una raccomandazione. Potresti provare a descrivere meglio il tipo di gioco che cerchi?"
+                    elif intent == "info_request":
+                        reply = "Mi dispiace, non sono riuscito a recuperare le informazioni richieste. Potresti riprovare con una domanda più specifica?"
+                    else:
+                        reply = "Mi dispiace, c'è stato un problema nella generazione della risposta. Potresti riprovare?"
+            except Exception as e:
+                elapsed_time = time.time() - start_time if 'start_time' in locals() else 0
+                logger.error(f"Error in AI response generation dopo {elapsed_time:.2f} secondi: {e}")
+                reply = "Mi dispiace, c'è stato un errore nella generazione della risposta. Puoi riprovare con una domanda diversa sui giochi Nintendo?"
         
         # NON cercare giochi raccomandati automaticamente se non esplicitamente richiesto
         # I giochi raccomandati vengono mostrati SOLO quando l'intent è "recommendation_request"
@@ -589,44 +629,44 @@ Mood: {', '.join(recommended.get('mood', []))}
             saved_to_favorites = False
             
             if should_save_favorite:
-            # Prova a salvare il gioco corrente
-            game_to_save = None
-            game_name_to_save = None
-            
-            if game_info:
-                game_to_save = game_info.model_dump() if hasattr(game_info, 'model_dump') else game_info.dict()
-                game_name_to_save = game_info.title
-                saved_to_favorites = save_to_favorites(game_name_to_save, game_to_save)
-            elif recommended_game:
-                game_to_save = recommended_game.model_dump() if hasattr(recommended_game, 'model_dump') else recommended_game.dict()
-                game_name_to_save = recommended_game.title
-                saved_to_favorites = save_to_favorites(game_name_to_save, game_to_save)
-            else:
-                # Se non c'è game_info nel contesto, prova a estrarre il nome del gioco dal messaggio
-                # o cercarlo nella memoria recente
-                from app.services.user_memory_service import extract_game_names, load_memory
-                memory = load_memory()
+                # Prova a salvare il gioco corrente
+                game_to_save = None
+                game_name_to_save = None
                 
-                # Estrai nomi di giochi dal messaggio
-                games_in_message = extract_game_names(last_user_message)
-                
-                # Cerca anche nei giochi menzionati di recente o nelle info fornite
-                if not games_in_message and memory.get("provided_info"):
-                    # Prendi l'ultimo gioco di cui si sono chiesti info
-                    last_info = memory["provided_info"][-1]
-                    games_in_message = [last_info.get("title", "")]
-                
-                if games_in_message:
-                    game_name_to_save = games_in_message[0]
-                    # Cerca info del gioco nella memoria
-                    game_info_from_memory = None
-                    for info in memory.get("provided_info", []):
-                        if info.get("title", "").lower() == game_name_to_save.lower():
-                            game_info_from_memory = info
-                            break
+                if game_info:
+                    game_to_save = game_info.model_dump() if hasattr(game_info, 'model_dump') else game_info.dict()
+                    game_name_to_save = game_info.title
+                    saved_to_favorites = save_to_favorites(game_name_to_save, game_to_save)
+                elif recommended_game:
+                    game_to_save = recommended_game.model_dump() if hasattr(recommended_game, 'model_dump') else recommended_game.dict()
+                    game_name_to_save = recommended_game.title
+                    saved_to_favorites = save_to_favorites(game_name_to_save, game_to_save)
+                else:
+                    # Se non c'è game_info nel contesto, prova a estrarre il nome del gioco dal messaggio
+                    # o cercarlo nella memoria recente
+                    from app.services.user_memory_service import extract_game_names, load_memory
+                    memory = load_memory()
                     
-                    saved_to_favorites = save_to_favorites(game_name_to_save, game_info_from_memory)
-            
+                    # Estrai nomi di giochi dal messaggio
+                    games_in_message = extract_game_names(last_user_message)
+                    
+                    # Cerca anche nei giochi menzionati di recente o nelle info fornite
+                    if not games_in_message and memory.get("provided_info"):
+                        # Prendi l'ultimo gioco di cui si sono chiesti info
+                        last_info = memory["provided_info"][-1]
+                        games_in_message = [last_info.get("title", "")]
+                    
+                    if games_in_message:
+                        game_name_to_save = games_in_message[0]
+                        # Cerca info del gioco nella memoria
+                        game_info_from_memory = None
+                        for info in memory.get("provided_info", []):
+                            if info.get("title", "").lower() == game_name_to_save.lower():
+                                game_info_from_memory = info
+                                break
+                        
+                        saved_to_favorites = save_to_favorites(game_name_to_save, game_info_from_memory)
+                
                 if saved_to_favorites:
                     # Aggiungi conferma alla risposta solo se non è già vuota o di errore
                     game_name = game_name_to_save or (game_info.title if game_info else (recommended_game.title if recommended_game else "questo gioco"))

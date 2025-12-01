@@ -25,7 +25,7 @@ def classify_intent(user_message: str) -> str:
     info_keywords = [
         "chi è", "cos'è", "cosa è", "come funziona", "che modalità", "trama", 
         "gameplay", "difficoltà", "spiegami", "dimmi", "raccontami", 
-        "parlami di", "info su", "informazioni", "caratteristiche", 
+        "parlami di", "mi parli di", "parlarmi di", "info su", "informazioni", "caratteristiche", 
         "meccaniche", "storia", "plot", "modalità di gioco", "come si gioca"
     ]
     
