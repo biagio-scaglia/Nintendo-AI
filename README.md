@@ -9,6 +9,7 @@ Sistema intelligente di raccomandazione giochi Nintendo basato su AI, con API RE
 - 📱 **App Flutter**: Applicazione mobile cross-platform (Android/iOS) con visualizzazione strutturata
 - 🔍 **Ricerca Intelligente**: Sistema RAG per informazioni dettagliate sui giochi
 - 🌐 **Integrazione Fandom**: Scraping completo da wiki Fandom per informazioni accurate su giochi e personaggi
+- 📚 **Wikipedia Agent**: Modulo strutturato per query Wikipedia con estrazione keyword e matching automatico
 - 🖼️ **Immagini Personaggi**: Estrazione automatica di immagini da Fandom per personaggi Nintendo
 - 📄 **Scraping Intelligente**: Estrae 15 paragrafi e 5 liste di default per risposte concise
 - 🔍 **Approfondimento su Richiesta**: Chiedi "approfondisci" o "dimmi di più" per estrarre tutto il contenuto dalla stessa pagina
@@ -28,7 +29,7 @@ nintendo_ai/
 │   ├── db/                # Database giochi
 │   ├── knowledge/         # Sistema RAG
 │   ├── services/          # Servizi di raccomandazione
-│   └── tools/             # Utilità e scraper
+│   └── tools/             # Utilità e scraper (wiki_agent, game_scraper)
 ├── flutter_app/           # App mobile Flutter
 └── requirements.txt       # Dipendenze Python
 ```
@@ -115,6 +116,15 @@ Content-Type: application/json
 }
 ```
 
+### Memoria Utente
+```http
+GET /memory              # Ottieni memoria salvata
+POST /memory/clear       # Cancella memoria
+GET /profile             # Ottieni profilo utente
+POST /profile/name        # Imposta nome utente
+GET /profile/report       # Genera resoconto personalità
+```
+
 ## 🎯 Come Funziona
 
 1. **Analisi Umore**: L'AI analizza il messaggio dell'utente per estrarre mood e preferenze
@@ -162,7 +172,8 @@ static const String baseUrl = 'http://localhost:8000';
 - `uvicorn` - Server ASGI
 - `pydantic` - Validazione dati
 - `requests` - Client HTTP per Ollama
-- `beautifulsoup4` - Web scraping (opzionale)
+- `beautifulsoup4` - Web scraping
+- `wikipedia-api` - Client Wikipedia API per WikiAgent
 
 ### Flutter
 - `http` - Client HTTP
@@ -177,8 +188,11 @@ static const String baseUrl = 'http://localhost:8000';
 - **`app/services/recommender_service.py`**: Logica di raccomandazione
 - **`app/services/info_service.py`**: Sistema RAG per info giochi
 - **`app/services/web_search_service.py`**: Scraping Fandom e ricerca web per giochi/personaggi non nel DB
+- **`app/services/user_memory_service.py`**: Sistema di memoria persistente per preferenze e profilo utente
+- **`app/tools/wiki_agent.py`**: Modulo Wikipedia Agent per query strutturate su Wikipedia
 - **`app/knowledge/rag_engine.py`**: Motore di ricerca semantica
 - **`app/db/nintendo_games.json`**: Database giochi con tags/mood
+- **`app/db/user_memory.json`**: Memoria utente (preferiti, preferenze, conversazioni)
 - **`app/knowledge/game_details.json`**: Dettagli completi giochi
 
 ### Struttura Flutter
@@ -276,6 +290,36 @@ Il sistema include scraping diretto da wiki Fandom per informazioni accurate e a
 - Walkthrough o soluzioni puzzle
 - Trucchi o cheat codes
 
+## 📚 WikiAgent Module
+
+Il modulo `wiki_agent.py` fornisce accesso strutturato a Wikipedia:
+
+### Funzionalità
+
+- **`search(query)`**: Cerca pagine Wikipedia e restituisce lista di titoli
+- **`get_page(title)`**: Ottiene pagina completa con summary, full_text e sections
+- **`answer(question)`**: Risponde a domande in linguaggio naturale con estrazione keyword automatica
+
+### Uso
+
+```python
+from app.tools.wiki_agent import WikiAgent
+
+wiki = WikiAgent(lang="it")
+answer = wiki.answer("Chi è Mario?")
+# Restituisce: {
+#   "matched_page": "Super Mario",
+#   "summary": "...",
+#   "relevant_section": "Storia",
+#   "full_text": "..."
+# }
+```
+
+### Gestione Errori
+
+- `{"error": "no_results"}` - Nessuna pagina trovata
+- `{"error": "empty_page"}` - Pagina senza contenuto
+
 ## 📝 Note
 
 - Il sistema usa **solo Ollama** (nessun modello locale)
@@ -288,6 +332,9 @@ Il sistema include scraping diretto da wiki Fandom per informazioni accurate e a
 - **Logging tempi**: Tutti i tempi di risposta vengono loggati nel terminale
 - **Modalità fast**: Messaggi colloquiali come "ciao" hanno risposte ottimizzate (5-10 sec invece di 30-40 sec)
 - **Immagini Fandom**: Le immagini dei personaggi vengono estratte automaticamente da Fandom quando disponibili
+- **Memoria Persistente**: Il sistema salva automaticamente preferenze, conversazioni e preferiti per personalizzazione
+- **Sistema Preferiti**: Chiedi "segna nei preferiti" per salvare giochi nel profilo
+- **Resoconto Personalità**: Genera analisi del profilo di gioco basata su preferenze e conversazioni
 
 ## 📄 Licenza
 
