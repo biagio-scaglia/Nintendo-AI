@@ -119,6 +119,14 @@ async def chat_endpoint(payload: ChatRequest):
             if last_user_msg:
                 last_user_message = last_user_msg[-1].get("content", "")
         
+        # Controlla PRIMA se l'utente vuole solo salvare nei preferiti (senza altre domande)
+        should_save_favorite = detect_save_favorite_intent(last_user_message)
+        # Considera come richiesta singola se contiene solo parole relative al salvataggio
+        save_only_phrases = ["segna tra i preferiti", "segna nei preferiti", "metti nei preferiti", 
+                            "salva nei preferiti", "aggiungi ai preferiti", "salva questo", 
+                            "metti questo", "segna questo"]
+        is_only_save_request = should_save_favorite and any(phrase in last_user_message.lower() for phrase in save_only_phrases)
+        
         intent = classify_intent(last_user_message)
         logger.info(f"Detected intent: {intent}")
         
@@ -372,14 +380,41 @@ Mood: {', '.join(recommended.get('mood', []))}
             else:
                 context = personalization_context
         
-        formatted = format_for_engine(validated)
-        
-        try:
-            start_time = time.time()
-            logger.info("⏱️  Inizio generazione risposta AI...")
-            # Per small_talk, usa parametri più veloci (risposte più brevi)
-            is_small_talk = intent == "small_talk"
-            reply = chat_nintendo_ai(formatted, context=context, fast_mode=is_small_talk)
+        # Se è solo una richiesta di salvataggio, gestiscila direttamente senza chiamare l'AI
+        if is_only_save_request:
+            from app.services.user_memory_service import extract_game_names, load_memory
+            memory = load_memory()
+            
+            # Prova a trovare il gioco da salvare
+            games_in_message = extract_game_names(last_user_message)
+            if not games_in_message and memory.get("provided_info"):
+                last_info = memory["provided_info"][-1]
+                games_in_message = [last_info.get("title", "")]
+            
+            if games_in_message:
+                game_name_to_save = games_in_message[0]
+                game_info_from_memory = None
+                for info in memory.get("provided_info", []):
+                    if info.get("title", "").lower() == game_name_to_save.lower():
+                        game_info_from_memory = info
+                        break
+                
+                saved_to_favorites = save_to_favorites(game_name_to_save, game_info_from_memory)
+                if saved_to_favorites:
+                    reply = f"✅ Ho salvato '{game_name_to_save}' nei tuoi preferiti! Puoi vederlo nella sezione Profilo."
+                else:
+                    reply = f"'{game_name_to_save}' è già nei tuoi preferiti!"
+            else:
+                reply = "Non ho trovato un gioco da salvare. Chiedimi prima informazioni su un gioco specifico!"
+        else:
+            formatted = format_for_engine(validated)
+            
+            try:
+                start_time = time.time()
+                logger.info("⏱️  Inizio generazione risposta AI...")
+                # Per small_talk, usa parametri più veloci (risposte più brevi)
+                is_small_talk = intent == "small_talk"
+                reply = chat_nintendo_ai(formatted, context=context, fast_mode=is_small_talk)
             elapsed_time = time.time() - start_time
             logger.info(f"⏱️  Tempo totale per generare la risposta: {elapsed_time:.2f} secondi ({elapsed_time/60:.2f} minuti)")
             
@@ -406,11 +441,12 @@ Mood: {', '.join(recommended.get('mood', []))}
         logger.info("Chat response generated successfully")
         logger.info(f"Returning response with info: {game_info is not None}, recommended_game: {recommended_game is not None}")
         
-        # Controlla se l'utente vuole salvare nei preferiti
-        should_save_favorite = detect_save_favorite_intent(last_user_message)
-        saved_to_favorites = False
-        
-        if should_save_favorite:
+        # Controlla se l'utente vuole salvare nei preferiti (solo se non è già stato gestito)
+        if not is_only_save_request:
+            should_save_favorite = detect_save_favorite_intent(last_user_message)
+            saved_to_favorites = False
+            
+            if should_save_favorite:
             # Prova a salvare il gioco corrente
             game_to_save = None
             game_name_to_save = None
@@ -449,13 +485,20 @@ Mood: {', '.join(recommended.get('mood', []))}
                     
                     saved_to_favorites = save_to_favorites(game_name_to_save, game_info_from_memory)
             
-            if saved_to_favorites:
-                # Aggiungi conferma alla risposta
-                game_name = game_name_to_save or (game_info.title if game_info else (recommended_game.title if recommended_game else "questo gioco"))
-                reply = f"✅ Ho salvato '{game_name}' nei tuoi preferiti! Puoi vederlo nella sezione Profilo.\n\n{reply}"
-            elif should_save_favorite:
-                # Se voleva salvare ma non c'è un gioco da salvare
-                reply = "Non ho trovato un gioco da salvare nei preferiti. Chiedimi informazioni su un gioco specifico e poi chiedi di salvarlo!\n\n" + reply
+                if saved_to_favorites:
+                    # Aggiungi conferma alla risposta solo se non è già vuota o di errore
+                    game_name = game_name_to_save or (game_info.title if game_info else (recommended_game.title if recommended_game else "questo gioco"))
+                    if reply and "non sono riuscito" not in reply.lower():
+                        reply = f"✅ Ho salvato '{game_name}' nei tuoi preferiti! Puoi vederlo nella sezione Profilo.\n\n{reply}"
+                    else:
+                        # Se la risposta è vuota o di errore, usa solo la conferma
+                        reply = f"✅ Ho salvato '{game_name}' nei tuoi preferiti! Puoi vederlo nella sezione Profilo."
+                elif should_save_favorite:
+                    # Se voleva salvare ma non c'è un gioco da salvare
+                    if reply and "non sono riuscito" not in reply.lower():
+                        reply = "Non ho trovato un gioco da salvare nei preferiti. Chiedimi informazioni su un gioco specifico e poi chiedi di salvarlo!\n\n" + reply
+                    else:
+                        reply = "Non ho trovato un gioco da salvare nei preferiti. Chiedimi informazioni su un gioco specifico e poi chiedi di salvarlo!"
         
         # Salva informazioni nella memoria per personalizzazione futura
         try:
