@@ -6,7 +6,17 @@ from app.utils import validate_history, format_for_engine, classify_intent
 from app.services.recommender_service import load_games, filter_by_platform, smart_recommend, get_similar_games
 from app.services.info_service import get_game_info, search_game_info, get_context_for_ai
 from app.services.web_search_service import get_web_context, get_web_game_info, get_web_image_url, extract_entity_name, detect_fandom_series
-from app.services.user_memory_service import update_memory_from_conversation, get_personalization_context, load_memory, clear_memory
+from app.services.user_memory_service import (
+    update_memory_from_conversation, 
+    get_personalization_context, 
+    load_memory, 
+    clear_memory,
+    detect_save_favorite_intent,
+    save_to_favorites,
+    set_user_name,
+    get_user_profile,
+    generate_personality_report
+)
 import uvicorn
 import logging
 import re
@@ -396,6 +406,28 @@ Mood: {', '.join(recommended.get('mood', []))}
         logger.info("Chat response generated successfully")
         logger.info(f"Returning response with info: {game_info is not None}, recommended_game: {recommended_game is not None}")
         
+        # Controlla se l'utente vuole salvare nei preferiti
+        should_save_favorite = detect_save_favorite_intent(last_user_message)
+        saved_to_favorites = False
+        
+        if should_save_favorite:
+            # Prova a salvare il gioco corrente
+            game_to_save = None
+            if game_info:
+                game_to_save = game_info.model_dump() if hasattr(game_info, 'model_dump') else game_info.dict()
+                saved_to_favorites = save_to_favorites(game_info.title, game_to_save)
+            elif recommended_game:
+                game_to_save = recommended_game.model_dump() if hasattr(recommended_game, 'model_dump') else recommended_game.dict()
+                saved_to_favorites = save_to_favorites(recommended_game.title, game_to_save)
+            
+            if saved_to_favorites:
+                # Aggiungi conferma alla risposta
+                game_name = game_info.title if game_info else (recommended_game.title if recommended_game else "questo gioco")
+                reply = f"✅ Ho salvato '{game_name}' nei tuoi preferiti! Puoi vederlo nella sezione Profilo.\n\n{reply}"
+            elif should_save_favorite:
+                # Se voleva salvare ma non c'è un gioco da salvare
+                reply = "Non ho trovato un gioco da salvare nei preferiti. Chiedimi informazioni su un gioco specifico e poi chiedi di salvarlo!\n\n" + reply
+        
         # Salva informazioni nella memoria per personalizzazione futura
         try:
             game_info_dict = None
@@ -478,6 +510,72 @@ async def clear_user_memory():
     except Exception as e:
         logger.error(f"Error clearing memory: {str(e)}", exc_info=True)
         return {"error": "Failed to clear memory"}
+
+@app.post("/profile/name")
+async def set_profile_name(name_data: dict):
+    """Imposta il nome utente"""
+    try:
+        user_name = name_data.get("name", "").strip()
+        if not user_name:
+            return {"error": "Name cannot be empty"}
+        set_user_name(user_name)
+        return {"message": "Name set successfully", "name": user_name}
+    except Exception as e:
+        logger.error(f"Error setting name: {str(e)}", exc_info=True)
+        return {"error": "Failed to set name"}
+
+@app.get("/profile")
+async def get_profile():
+    """Ottiene il profilo completo dell'utente"""
+    try:
+        profile = get_user_profile()
+        return profile
+    except Exception as e:
+        logger.error(f"Error getting profile: {str(e)}", exc_info=True)
+        return {"error": "Failed to get profile"}
+
+@app.get("/profile/report")
+async def get_personality_report():
+    """Genera un resoconto della personalità dell'utente"""
+    try:
+        report = generate_personality_report()
+        return {"report": report}
+    except Exception as e:
+        logger.error(f"Error generating report: {str(e)}", exc_info=True)
+        return {"error": "Failed to generate report"}
+
+@app.post("/profile/name")
+async def set_profile_name(name_data: dict):
+    """Imposta il nome utente"""
+    try:
+        user_name = name_data.get("name", "").strip()
+        if not user_name:
+            return {"error": "Name cannot be empty"}
+        set_user_name(user_name)
+        return {"message": "Name set successfully", "name": user_name}
+    except Exception as e:
+        logger.error(f"Error setting name: {str(e)}", exc_info=True)
+        return {"error": "Failed to set name"}
+
+@app.get("/profile")
+async def get_profile():
+    """Ottiene il profilo completo dell'utente"""
+    try:
+        profile = get_user_profile()
+        return profile
+    except Exception as e:
+        logger.error(f"Error getting profile: {str(e)}", exc_info=True)
+        return {"error": "Failed to get profile"}
+
+@app.get("/profile/report")
+async def get_personality_report():
+    """Genera un resoconto della personalità dell'utente"""
+    try:
+        report = generate_personality_report()
+        return {"report": report}
+    except Exception as e:
+        logger.error(f"Error generating report: {str(e)}", exc_info=True)
+        return {"error": "Failed to generate report"}
 
 if __name__ == "__main__":
     uvicorn.run(

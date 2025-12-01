@@ -20,6 +20,7 @@ def load_memory() -> Dict:
     
     # Ritorna struttura vuota se non esiste o errore
     return {
+        "user_name": "",
         "preferences": {
             "favorite_games": [],
             "favorite_genres": [],
@@ -27,6 +28,7 @@ def load_memory() -> Dict:
             "preferred_difficulty": [],
             "mood_preferences": []
         },
+        "favorites": [],  # Lista di giochi salvati nei preferiti
         "mentioned_games": [],
         "provided_info": [],
         "conversation_history": [],
@@ -260,4 +262,108 @@ def clear_memory():
         logger.info("Memory cleared")
     except Exception as e:
         logger.error(f"Error clearing memory: {e}")
+
+def detect_save_favorite_intent(user_message: str) -> bool:
+    """Rileva se l'utente vuole salvare qualcosa nei preferiti"""
+    message_lower = user_message.lower()
+    save_keywords = [
+        "segna nei preferiti", "salva nei preferiti", "aggiungi ai preferiti",
+        "metti nei preferiti", "aggiungi preferiti", "salva preferito",
+        "segna come preferito", "salva questo", "aggiungi questo",
+        "voglio salvare", "salvami", "preferiti"
+    ]
+    return any(keyword in message_lower for keyword in save_keywords)
+
+def save_to_favorites(game_title: str, game_info: Optional[Dict] = None):
+    """Salva un gioco nei preferiti"""
+    memory = load_memory()
+    
+    if "favorites" not in memory:
+        memory["favorites"] = []
+    
+    # Controlla se già esiste
+    existing = [f for f in memory["favorites"] if f.get("title", "").lower() == game_title.lower()]
+    if existing:
+        logger.info(f"Game {game_title} already in favorites")
+        return False
+    
+    favorite_entry = {
+        "title": game_title,
+        "timestamp": datetime.now().isoformat(),
+        "platform": game_info.get("platform", "") if game_info else "",
+        "description": game_info.get("description", "")[:150] if game_info else "",
+    }
+    
+    memory["favorites"].append(favorite_entry)
+    save_memory(memory)
+    logger.info(f"Saved {game_title} to favorites")
+    return True
+
+def set_user_name(name: str):
+    """Imposta il nome utente"""
+    memory = load_memory()
+    memory["user_name"] = name.strip()
+    save_memory(memory)
+    logger.info(f"User name set to: {name}")
+
+def get_user_profile() -> Dict:
+    """Ottiene il profilo completo dell'utente"""
+    memory = load_memory()
+    return {
+        "user_name": memory.get("user_name", ""),
+        "favorites": memory.get("favorites", []),
+        "preferences": memory.get("preferences", {}),
+        "mentioned_games": memory.get("mentioned_games", []),
+        "total_conversations": len(memory.get("conversation_history", [])),
+    }
+
+def generate_personality_report() -> str:
+    """Genera un resoconto della personalità dell'utente basato sulle conversazioni"""
+    memory = load_memory()
+    
+    if not memory.get("conversation_history") and not memory.get("favorites"):
+        return "Non ci sono ancora abbastanza dati per generare un resoconto. Inizia a chattare e salva alcuni giochi nei preferiti!"
+    
+    report_parts = []
+    
+    # Analisi preferiti
+    favorites = memory.get("favorites", [])
+    if favorites:
+        report_parts.append(f"🎮 Hai salvato {len(favorites)} giochi nei preferiti:")
+        for fav in favorites[:5]:
+            report_parts.append(f"   • {fav.get('title', 'Sconosciuto')}")
+    
+    # Analisi generi preferiti
+    genres = memory.get("preferences", {}).get("favorite_genres", [])
+    if genres:
+        report_parts.append(f"\n📚 I tuoi generi preferiti: {', '.join(genres)}")
+    
+    # Analisi mood
+    moods = memory.get("preferences", {}).get("mood_preferences", [])
+    if moods:
+        report_parts.append(f"\n💭 Preferisci giochi: {', '.join(moods)}")
+    
+    # Analisi piattaforme
+    platforms = memory.get("preferences", {}).get("favorite_platforms", [])
+    if platforms:
+        report_parts.append(f"\n🎯 Le tue piattaforme preferite: {', '.join(platforms)}")
+    
+    # Analisi difficoltà
+    difficulty = memory.get("preferences", {}).get("preferred_difficulty", [])
+    if difficulty:
+        report_parts.append(f"\n⚙️ Preferisci difficoltà: {', '.join(difficulty)}")
+    
+    # Analisi conversazioni
+    conversations = len(memory.get("conversation_history", []))
+    if conversations > 0:
+        report_parts.append(f"\n💬 Hai avuto {conversations} conversazioni con l'assistente")
+    
+    # Conclusione
+    if not report_parts:
+        return "Non ci sono ancora abbastanza dati per generare un resoconto."
+    
+    report = "\n".join(report_parts)
+    report += "\n\n✨ Continua a esplorare giochi e salva quelli che ti piacciono per un resoconto più dettagliato!"
+    
+    return report
 
